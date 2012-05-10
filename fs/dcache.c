@@ -191,9 +191,6 @@ static inline int dentry_string_cmp(const unsigned char *cs, const unsigned char
 
 static inline int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount)
 {
-	if (dentry->d_name.len != tcount)
-		return 1;
-
 	/*
 	 * Be careful about RCU walk racing with rename:
 	 * use ACCESS_ONCE to fetch the name pointer.
@@ -1469,6 +1466,8 @@ static struct dentry *__d_instantiate_unique(struct dentry *entry,
 			continue;
 		if (alias->d_parent != entry->d_parent)
 			continue;
+		if (alias->d_name.len != len)
+			continue;
 		if (dentry_cmp(alias, name, len))
 			continue;
 		__dget(alias);
@@ -1887,6 +1886,8 @@ seqretry:
 			}
 		}
 
+		if (dentry->d_name.len != len)
+			continue;
 		if (!dentry_cmp(dentry, str, len))
 			return dentry;
 	}
@@ -1989,6 +1990,8 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 						tlen, tname, name))
 				goto next;
 		} else {
+			if (dentry->d_name.len != len)
+				goto next;
 			if (dentry_cmp(dentry, str, len))
 				goto next;
 		}
