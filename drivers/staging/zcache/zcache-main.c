@@ -1817,9 +1817,9 @@ static struct cleancache_ops zcache_cleancache_ops = {
 	.init_fs = zcache_cleancache_init_fs
 };
 
-struct cleancache_ops zcache_cleancache_register_ops(void)
+struct cleancache_ops *zcache_cleancache_register_ops(void)
 {
-	struct cleancache_ops old_ops =
+	struct cleancache_ops *old_ops =
 		cleancache_register_ops(&zcache_cleancache_ops);
 
 	return old_ops;
@@ -2053,15 +2053,15 @@ static int __init zcache_init(void)
 	}
 #endif
 #ifdef CONFIG_CLEANCACHE
-	if (zcache_enabled && use_cleancache) {
-		struct cleancache_ops old_ops;
+	if (zcache_enabled && !disable_cleancache) {
+		struct cleancache_ops *old_ops;
 
 		zbud_init();
 		register_shrinker(&zcache_shrinker);
 		old_ops = zcache_cleancache_register_ops();
 		pr_info("zcache: cleancache enabled using kernel "
 			"transcendent memory and compression buddies\n");
-		if (old_ops.init_fs != NULL)
+		if (old_ops != NULL)
 			pr_warning("zcache: cleancache_ops overridden");
 	}
 #endif
