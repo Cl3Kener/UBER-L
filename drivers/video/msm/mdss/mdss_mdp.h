@@ -396,6 +396,8 @@ struct mdss_overlay_private {
 	struct list_head rot_proc_list;
 	bool mixer_swap;
 
+	int ad_state;
+
 	struct sw_sync_timeline *vsync_timeline;
 	struct mdss_mdp_vsync_handler vsync_retire_handler;
 	struct work_struct retire_work;
