@@ -113,6 +113,7 @@ struct mdss_data_type {
 	void *video_intf;
 	u32 nintf;
 
+	struct mdss_mdp_ad *ad_off;
 	struct mdss_ad_info *ad_cfgs;
 	u32 nad_cfgs;
 	u32 nmax_concurrent_ad_hw;
