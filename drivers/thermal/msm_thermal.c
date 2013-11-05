@@ -1359,6 +1359,17 @@ static void __ref disable_msm_thermal(void)
 		update_cpu_freq(cpu);
 	}
 	put_online_cpus();
+	pr_warn("msm_thermal: Warning! Thermal guard disabled!");
+}
+
+static void enable_msm_thermal(void)
+{
+	enabled = 1;
+	/* make sure check_temp is running */
+	queue_delayed_work(check_temp_workq, &check_temp_work,
+			   msecs_to_jiffies(msm_thermal_info.poll_ms));
+
+	pr_info("msm_thermal: Thermal guard enabled.");
 }
 
 static int __ref set_enabled(const char *val, const struct kernel_param *kp)
@@ -1368,9 +1379,9 @@ static int __ref set_enabled(const char *val, const struct kernel_param *kp)
 	ret = param_set_bool(val, kp);
 	if (!enabled) {
 		disable_msm_thermal();
-		hotplug_init();
-		freq_mitigation_init();
-	} else
+	else if (enabled == 1)
+		enable_msm_thermal();
+	else
 		pr_info("%s: no action for enabled = %d\n",
 			KBUILD_MODNAME, enabled);
 
