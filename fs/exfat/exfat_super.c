@@ -1404,8 +1404,7 @@ static int exfat_bmap(struct inode *inode, sector_t sector, sector_t *phys,
 
 	last_block = (i_size_read(inode) + (blocksize - 1)) >> blocksize_bits;
 	if (sector >= last_block) {
-		if (*create == 0)
-			return 0;
+		if (*create == 0) return 0;
 	} else {
 		*create = 0;
 	}
@@ -1553,6 +1552,9 @@ static ssize_t exfat_direct_IO(int rw, struct kiocb *iocb, struct iov_iter *iter
 				loff_t offset)
 #else
 static ssize_t exfat_direct_IO(int rw, struct kiocb *iocb,
+#ifdef CONFIG_AIO_OPTIMIZATION
+				struct iov_iter *iter, loff_t offset)
+#else
 				const struct iovec *iov,
 				loff_t offset, unsigned long nr_segs)
 #endif
@@ -1564,17 +1566,18 @@ static ssize_t exfat_direct_IO(int rw, struct kiocb *iocb,
 	ssize_t ret;
 
 	if (rw == WRITE) {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
-		if (EXFAT_I(inode)->mmu_private < (offset + iov_iter_count(iter)))
+#ifdef CONFIG_AIO_OPTIMIZATION
+		if (EXFAT_I(inode)->mmu_private <
+			(offset + iov_iter_count(iter)))
 #else
 		if (EXFAT_I(inode)->mmu_private < (offset + iov_length(iov, nr_segs)))
 #endif
 			return 0;
 	}
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,00)
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
-	ret = blockdev_direct_IO(rw, iocb, inode, iter,
-					offset, exfat_get_block);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,4,00)
+#ifdef CONFIG_AIO_OPTIMIZATION
+	ret = blockdev_direct_IO(rw, iocb, inode, iter, offset,
+				 exfat_get_block);
 #else
 	ret = blockdev_direct_IO(rw, iocb, inode, iov,
 					offset, nr_segs, exfat_get_block);
@@ -1586,7 +1589,7 @@ static ssize_t exfat_direct_IO(int rw, struct kiocb *iocb,
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,34)
 	if ((ret < 0) && (rw & WRITE))
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+#ifdef CONFIG_AIO_OPTIMIZATION
 		exfat_write_failed(mapping, offset+iov_iter_count(iter));
 #else
 		exfat_write_failed(mapping, offset+iov_length(iov, nr_segs));
