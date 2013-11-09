@@ -3999,7 +3999,7 @@ static void l2cap_conf_ext_fs_get(struct sock *sk, void *rsp, int len)
 static int l2cap_finish_amp_move(struct sock *sk)
 {
 	struct l2cap_pinfo *pi;
-	int err;
+	int err =0;
 
 	BT_DBG("sk %p", sk);
 
