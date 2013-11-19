@@ -133,7 +133,7 @@ static int smsc95xx_phy_wait_not_busy(struct usbnet *dev)
 static int smsc95xx_mdio_read(struct net_device *netdev, int phy_id, int idx)
 {
 	struct usbnet *dev = netdev_priv(netdev);
-	u32 val, addr;
+	u32 val = 0, addr;
 
 	mutex_lock(&dev->phy_mutex);
 
