@@ -286,6 +286,12 @@ config ASYNC_FSYNC
 	bool "asynchronous fsync"
 	default y
 
+config ASYNC_FSYNC
+	bool
+	string "asynchronous fsync"
+	default y
+
+
 config DYNAMIC_FSYNC
 	bool "dynamic file sync control"
 	default n
