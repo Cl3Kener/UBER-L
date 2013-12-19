@@ -184,6 +184,36 @@ static int vmap_page_range(unsigned long start, unsigned long end,
 	return ret;
 }
 
+#ifdef ENABLE_VMALLOC_SAVING
+int is_vmalloc_addr(const void *x)
+{
+	struct rb_node *n;
+	struct vmap_area *va;
+	int ret = 0;
+
+	spin_lock(&vmap_area_lock);
+
+	for (n = rb_first(vmap_area_root); n; rb_next(n)) {
+		va = rb_entry(n, struct vmap_area, rb_node);
+		if (x >= va->va_start && x < va->va_end) {
+			ret = 1;
+			break;
+		}
+	}
+
+	spin_unlock(&vmap_area_lock);
+	return ret;
+}
+#else
+int is_vmalloc_addr(const void *x)
+{
+	unsigned long addr = (unsigned long)x;
+
+	return addr >= VMALLOC_START && addr < VMALLOC_END;
+}
+#endif
+EXPORT_SYMBOL(is_vmalloc_addr);
+
 int is_vmalloc_or_module_addr(const void *x)
 {
 	/*
