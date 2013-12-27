@@ -182,7 +182,7 @@ __v7_setup:
 	teq	r10, r6
 	beq	4f
 	stmia	r12, {r0-r5, r7, r9, r11, lr}
-	bl	v7_flush_dcache_all
+	bl      v7_flush_dcache_louis
 	ldmia	r12, {r0-r5, r7, r9, r11, lr}
 
 4:
