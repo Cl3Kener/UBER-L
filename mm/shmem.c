@@ -805,7 +805,6 @@ static struct page *shmem_swapin(swp_entry_t swap, gfp_t gfp,
 	pvma.vm_start = 0;
 	pvma.vm_pgoff = index;
 	pvma.vm_ops = NULL;
-<<<<<<< HEAD
 	pvma.vm_policy = mpol_shared_policy_lookup(&info->policy, index);
 
 	page = swapin_readahead(swap, gfp, &pvma, 0);
@@ -814,13 +813,10 @@ static struct page *shmem_swapin(swp_entry_t swap, gfp_t gfp,
 	mpol_cond_put(pvma.vm_policy);
 
 	return page;
-=======
-	pvma.vm_policy = spol;
 #ifdef CONFIG_ZSWAP
 	pvma.anon_vma = NULL;
 #endif
 	return swapin_readahead(swap, gfp, &pvma, 0);
->>>>>>> 33bfdf6... zswap, frontswap, vnswap: extract and backport to Nexus series
 }
 
 static struct page *shmem_alloc_page(gfp_t gfp,
