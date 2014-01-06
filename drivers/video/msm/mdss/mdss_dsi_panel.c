@@ -34,14 +34,10 @@
 #endif
 #endif
 
-<<<<<<< HEAD
-=======
-#include <asm/system_info.h>
-
 #ifdef CONFIG_PWRKEY_SUSPEND
 #include <linux/qpnp/power-on.h>
 #endif
->>>>>>> 7417b8a... s2w/dt2w: Add power key toggle
+
 #include "mdss_dsi.h"
 
 #include <asm/system_info.h>
