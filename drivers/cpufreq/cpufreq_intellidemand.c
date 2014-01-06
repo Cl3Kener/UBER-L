@@ -48,7 +48,7 @@
 #define MAX_FREQUENCY_UP_THRESHOLD		(100)
 #define MIN_FREQUENCY_DOWN_DIFFERENTIAL		(1)
 #define DEF_SAMPLING_RATE			(30000)
-#define DBS_INPUT_EVENT_MIN_FREQ		(810000)
+#define DBS_INPUT_EVENT_MIN_FREQ		(960000)
 
 /*
  * The polling frequency of this governor depends on the capability of
