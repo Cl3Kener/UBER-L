@@ -19,7 +19,7 @@
  *
  * SMP support based on mod by faux123
  *
- * For a general overview of smartassV2 see the relavent part in
+ * For a general overview of smartass2 see the relavent part in
  * Documentation/cpu-freq/governors.txt
  *
  */
@@ -44,7 +44,7 @@
  * towards the ideal frequency and slower after it has passed it. Similarly,
  * lowering the frequency towards the ideal frequency is faster than below it.
  */
-#define DEFAULT_AWAKE_IDEAL_FREQ 768000
+#define DEFAULT_AWAKE_IDEAL_FREQ 960000
 static unsigned int awake_ideal_freq;
 
 /*
@@ -53,7 +53,7 @@ static unsigned int awake_ideal_freq;
  * that practically when sleep_ideal_freq==0 the awake_ideal_freq is used
  * also when suspended).
  */
-#define DEFAULT_SLEEP_IDEAL_FREQ 368640
+#define DEFAULT_SLEEP_IDEAL_FREQ 300000
 static unsigned int sleep_ideal_freq;
 
 /*
@@ -166,7 +166,7 @@ static int cpufreq_governor_smartass(struct cpufreq_policy *policy,
 static
 #endif
 struct cpufreq_governor cpufreq_gov_smartass2 = {
-	.name = "smartassV2",
+	.name = "smartass2",
 	.governor = cpufreq_governor_smartass,
 	.max_transition_latency = 9000000,
 	.owner = THIS_MODULE,
@@ -658,7 +658,7 @@ static struct attribute * smartass_attributes[] = {
 
 static struct attribute_group smartass_attr_group = {
 	.attrs = smartass_attributes,
-	.name = "smartassV2",
+	.name = "smartass2",
 };
 
 static int cpufreq_governor_smartass(struct cpufreq_policy *new_policy,
