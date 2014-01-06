@@ -80,6 +80,12 @@ config IOSCHED_FIOPS
           IOPS equally among all processes in the system. It's mainly for
           Flash based storage.
 
+config IOSCHED_FIFO
+ 	 bool
+ 	 default y
+ 	 ---help---
+ 	 Fifo is similar to no-op I/O scheduler and it's a minimal scheduler that does basic merging and sorting.
+
 config IOSCHED_SIO
 	tristate "Simple I/O scheduler"
 	default y
@@ -151,6 +157,9 @@ choice
 	config DEFAULT_SIO
 		bool "SIO" if IOSCHED_SIO=y
 
+        config DEFAULT_FIFO
+                bool "fifo" if IOSCHED_FIFO=y
+
  	config DEFAULT_VR
 		bool "VR" if IOSCHED_VR=y
 
@@ -168,6 +177,7 @@ config DEFAULT_IOSCHED
 	default "noop" if DEFAULT_NOOP
 	default "fiops" if DEFAULT_FIOPS
 	default "sio" if DEFAULT_SIO
+        default "fifo" if DEFAULT_FIFO
 	default "vr" if DEFAULT_VR
 	default "zen" if DEFAULT_ZEN
 
