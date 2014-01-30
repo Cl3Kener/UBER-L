@@ -530,7 +530,7 @@ config TCP_CONG_LP
 config TCP_CONG_VENO
 	tristate "TCP Veno"
 	depends on EXPERIMENTAL
-	default n
+	default y
 	---help---
 	TCP Veno is a sender-side only enhancement of TCP to obtain better
 	throughput over wireless networks. TCP Veno makes use of state
@@ -605,7 +605,7 @@ endif
 config TCP_CONG_CUBIC
 	tristate
 	depends on !TCP_CONG_ADVANCED
-	default y
+	default n
 
 config DEFAULT_TCP_CONG
 	string
