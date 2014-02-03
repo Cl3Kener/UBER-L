@@ -543,6 +543,10 @@ static inline int valid_io_request(struct zram *zram, struct bio *bio)
 		return 0;
 	}
 
+	if (unlikely((bio->bi_sector << SECTOR_SHIFT) + bio->bi_size >=
+		     zram->disksize))
+		return 0;
+
 	/* I/O request is valid */
 	return 1;
 }
@@ -824,8 +828,8 @@ static int __init zram_init(void)
 	return 0;
 
 free_devices:
-	while (dev_id)
-		destroy_device(&zram_devices[--dev_id]);
+	while (dev_id >= 0)
+		destroy_device(&zram_devices[dev_id--]);
 	kfree(zram_devices);
 unregister:
 	unregister_blkdev(zram_major, "zram");
@@ -841,9 +845,11 @@ static void __exit zram_exit(void)
 	for (i = 0; i < num_devices; i++) {
 		zram = &zram_devices[i];
 
+		get_disk(zram->disk);
 		destroy_device(zram);
 		if (zram->init_done)
 			zram_reset_device(zram);
+		put_disk(zram->disk);
 	}
 
 	unregister_blkdev(zram_major, "zram");
