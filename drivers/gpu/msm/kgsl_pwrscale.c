@@ -48,6 +48,7 @@ static struct kgsl_pwrscale_policy *kgsl_pwrscale_policies[] = {
 #ifdef CONFIG_MSM_SLEEP_STATS_DEVICE
 	&kgsl_pwrscale_policy_idlestats,
 #endif
+	&kgsl_pwrscale_policy_conservative,
 	NULL
 };
 

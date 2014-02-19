@@ -6,6 +6,7 @@ msm_kgsl_core-y = \
 	kgsl_sharedmem.o \
 	kgsl_pwrctrl.o \
 	kgsl_pwrscale.o \
+	kgsl_pwrscale_conservative.o \
 	kgsl_mmu.o \
 	kgsl_gpummu.o \
 	kgsl_iommu.o \
