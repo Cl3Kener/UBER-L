@@ -699,17 +699,16 @@ static int cpufreq_governor_smartass_h3(struct cpufreq_policy *new_policy,
 
 		/* Do not register the idle hook and create sysfs
 		 * entries if we have already done so. */
-		if (atomic_inc_return(&active_count) <= 1) 
-			return 0;
-
-		rc = sysfs_create_group(cpufreq_global_kobject,
+		if (atomic_inc_return(&active_count) <= 1) {
+			rc = sysfs_create_group(cpufreq_global_kobject,
 						&smartass_attr_group);
-		if (rc)
-			return rc;
+			if (rc)
+				return rc;
 
 			pm_idle_old = pm_idle;
 			pm_idle = cpufreq_idle;
-		
+			idle_notifier_register(&cpufreq_idle_nb);
+		}
 
 		if (this_smartass->cur_policy->cur < new_policy->max && !timer_pending(&this_smartass->timer))
 			reset_timer(cpu,this_smartass);
@@ -742,13 +741,12 @@ static int cpufreq_governor_smartass_h3(struct cpufreq_policy *new_policy,
 		flush_work(&freq_scale_work);
 		this_smartass->idle_exit_time = 0;
 
-		if (atomic_dec_return(&active_count) > 0) 
-		return 0;
-		
-		sysfs_remove_group(cpufreq_global_kobject,
+		if (atomic_dec_return(&active_count) <= 1) {
+			sysfs_remove_group(cpufreq_global_kobject,
 					   &smartass_attr_group);
-		pm_idle = pm_idle_old;
-		
+			pm_idle = pm_idle_old;
+			idle_notifier_unregister(&cpufreq_idle_nb);
+		}
 		break;
 	}
 
