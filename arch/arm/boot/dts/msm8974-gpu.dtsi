@@ -22,7 +22,7 @@
 
 		qcom,chipid = <0x03030000>;
 
-		qcom,initial-pwrlevel = <4>;
+		qcom,initial-pwrlevel = <5>;
 		qcom,step-pwrlevel = <2>;
 
 		qcom,idle-timeout = <8>; //<HZ/12>
