@@ -31,7 +31,6 @@
 #include <linux/timer.h>
 #include <linux/workqueue.h>
 #include <linux/moduleparam.h>
-#include <linux/notifier.h>
 #include <asm/cputime.h>
 #include <linux/powersuspend.h>
 
@@ -370,32 +369,6 @@ static void cpufreq_idle(void)
 		reset_timer(smp_processor_id(), this_smartass);
 }
 
-static int cpufreq_idle_notifier(struct notifier_block *nb,
-	unsigned long val, void *data) {
-	struct smartass_info_s *this_smartass = &per_cpu(smartass_info, smp_processor_id());
-	struct cpufreq_policy *policy = this_smartass->cur_policy;
-
-	if (!this_smartass->enable)
-		return NOTIFY_DONE;
-
-	if (val == IDLE_START) {
-		if (policy->cur == policy->max && !timer_pending(&this_smartass->timer)) {
-			reset_timer(smp_processor_id(), this_smartass);
-		} else if (policy->cur == policy->min) {
-			if (timer_pending(&this_smartass->timer))
-				del_timer(&this_smartass->timer);
-		}
-	} else if (val == IDLE_END) {
-		if (policy->cur == policy->min && !timer_pending(&this_smartass->timer))
-			reset_timer(smp_processor_id(), this_smartass);
-	}
-
-	return NOTIFY_OK;
-}
-static struct notifier_block cpufreq_idle_nb = {
-	.notifier_call = cpufreq_idle_notifier,
-};
-
 /* We use the same work function to sale up and down */
 static void cpufreq_smartass_freq_change_time_work(struct work_struct *work)
 {
@@ -479,9 +452,6 @@ static void cpufreq_smartass_freq_change_time_work(struct work_struct *work)
 		 * (idle cycles wake up the timer when the timer comes) */
 		else if (timer_pending(&this_smartass->timer))
 			del_timer(&this_smartass->timer);
-
-		cpufreq_notify_utilization(policy,
-			(this_smartass->cur_cpu_load * policy->cur) / policy->max);
 	}
 }
 
