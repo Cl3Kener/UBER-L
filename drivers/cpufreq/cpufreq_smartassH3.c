@@ -699,7 +699,7 @@ static int cpufreq_governor_smartass_h3(struct cpufreq_policy *new_policy,
 
 		/* Do not register the idle hook and create sysfs
 		 * entries if we have already done so. */
-		if (atomic_inc_return(&active_count) > 1) 
+		if (atomic_inc_return(&active_count) <= 1) 
 			return 0;
 
 		rc = sysfs_create_group(cpufreq_global_kobject,
