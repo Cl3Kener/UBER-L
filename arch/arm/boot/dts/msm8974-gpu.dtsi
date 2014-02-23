@@ -62,7 +62,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			compatible = "qcom,gpu-pwrlevels";
+		compatible = "qcom,gpu-pwrlevels";
 
                 qcom,gpu-pwrlevel@0 {
                     reg = <0>;
@@ -87,7 +87,7 @@
 
                 qcom,gpu-pwrlevel@3 {
                     reg = <3>;
-                    qcom,gpu-freq = <320000000>;
+                    qcom,gpu-freq = <389000000>;
                     qcom,bus-freq = <3>;
                     qcom,io-fraction = <66>;
                 };
