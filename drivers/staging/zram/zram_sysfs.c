@@ -29,9 +29,18 @@ static u64 zram_stat64_read(struct zram *zram, u64 *v)
 	return val;
 }
 
-static inline struct zram *dev_to_zram(struct device *dev)
+static struct zram *dev_to_zram(struct device *dev)
 {
-	return (struct zram *)dev_to_disk(dev)->private_data;
+	int i;
+	struct zram *zram = NULL;
+
+	for (i = 0; i < zram_get_num_devices(); i++) {
+		zram = &zram_devices[i];
+		if (disk_to_dev(zram->disk) == dev)
+			break;
+	}
+
+	return zram;
 }
 
 static ssize_t disksize_show(struct device *dev,
