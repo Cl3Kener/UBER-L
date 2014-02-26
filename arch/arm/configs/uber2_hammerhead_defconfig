@@ -712,6 +712,7 @@ CONFIG_KEXEC_HARDBOOT=y
 #
 # CPU Power Management
 #
+CONFIG_POWERSUSPEND=y
 
 #
 # CPU Frequency scaling
