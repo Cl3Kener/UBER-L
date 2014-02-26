@@ -813,9 +813,6 @@ static struct page *shmem_swapin(swp_entry_t swap, gfp_t gfp,
 	mpol_cond_put(pvma.vm_policy);
 
 	return page;
-#ifdef CONFIG_ZSWAP
-	pvma.anon_vma = NULL;
-#endif
 	return swapin_readahead(swap, gfp, &pvma, 0);
 }
 
