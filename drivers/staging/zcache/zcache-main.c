@@ -2053,7 +2053,7 @@ static int __init zcache_init(void)
 	}
 #endif
 #ifdef CONFIG_CLEANCACHE
-	if (zcache_enabled && !disable_cleancache) {
+	if (zcache_enabled && use_cleancache) {
 		struct cleancache_ops *old_ops;
 
 		zbud_init();
