@@ -20,6 +20,7 @@
 
 extern int force_fast_charge;
 extern int fast_charge_level;
+extern int fake_charge_ac;
 
 #define FAST_CHARGE_DISABLED		0	/* default */
 #define FAST_CHARGE_FORCE_AC		1
@@ -27,10 +28,14 @@ extern int fast_charge_level;
 
 #define FAST_CHARGE_500		500
 #define FAST_CHARGE_900		900
-#define FAST_CHARGE_1200	1200
+#define FAST_CHARGE_1200	1200		/* default for FAST_CHARGE_FORCE_AC */
 #define FAST_CHARGE_1500	1500
+#define FAST_CHARGE_1800	1800
 #define FAST_CHARGE_2000	2000
 
-#define FAST_CHARGE_LEVELS	"500 900 1200 1500 2000"
+#define FAST_CHARGE_LEVELS	"500 900 1200 1500 1800 2000"
+
+#define FAKE_CHARGE_AC_DISABLE	0		/* default */
+#define FAKE_CHARGE_AC_ENABLE	1
 
 #endif
