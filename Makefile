@@ -378,7 +378,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -funswitch-loops -fpredictive-commoning -fgcse-after-reload \
 		   -Wno-sizeof-pointer-memaccess \
                    -fmodulo-sched -fmodulo-sched-allow-regmoves \
-		   -mfpu=neon-vfpv4 -mtune=cortex-a15
+		   -mfpu=neon-vfpv4 -mcpu=cortex-a15 -mtune=cortex-a15
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
