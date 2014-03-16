@@ -1547,10 +1547,6 @@ static int exfat_write_end(struct file *file, struct address_space *mapping,
 	return err;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
-static ssize_t exfat_direct_IO(int rw, struct kiocb *iocb, struct iov_iter *iter,
-				loff_t offset)
-#else
 static ssize_t exfat_direct_IO(int rw, struct kiocb *iocb,
 #ifdef CONFIG_AIO_OPTIMIZATION
 				struct iov_iter *iter, loff_t offset)
