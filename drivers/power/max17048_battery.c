@@ -31,6 +31,10 @@
 #include <linux/debugfs.h>
 #include <linux/suspend.h>
 
+#ifdef CONFIG_BLX
+#include <linux/blx.h>
+#endif
+
 #define MODE_REG      0x06
 #define VCELL_REG     0x02
 #define SOC_REG       0x04
@@ -215,6 +219,11 @@ static int max17048_get_capacity_from_soc(struct max17048_chip *chip)
 {
 	u8 buf[2];
 	int batt_soc = 0;
+#ifdef CONFIG_BLX
+	int blx_max = 0;
+
+	blx_max = get_charginglimit();
+#endif
 
 	buf[0] = (chip->soc & 0x0000FF00) >> 8;
 	buf[1] = (chip->soc & 0x000000FF);
@@ -225,7 +234,11 @@ static int max17048_get_capacity_from_soc(struct max17048_chip *chip)
 	batt_soc = (batt_soc - (chip->empty_soc * 1000000))
 			/ ((chip->full_soc - chip->empty_soc) * 10000);
 
+#ifdef CONFIG_BLX
+	batt_soc = bound_check(blx_max, 0, batt_soc);
+#else
 	batt_soc = bound_check(100, 0, batt_soc);
+#endif
 
 	return batt_soc;
 }
@@ -250,12 +263,21 @@ static int max17048_check_recharge(struct max17048_chip *chip)
 {
 	union power_supply_propval ret = {true,};
 	int chg_status;
+#ifdef CONFIG_BLX
+	int blx_max = 0;
+
+	blx_max = get_charginglimit();
+#endif
 
 	if (chip->batt_health != POWER_SUPPLY_HEALTH_GOOD)
 		return false;
 
 	chg_status = max17048_get_prop_status(chip);
+#ifdef CONFIG_BLX
+	if (chip->capacity_level <= blx_max-1 &&
+#else
 	if (chip->capacity_level <= 99 &&
+#endif
 			chg_status == POWER_SUPPLY_STATUS_NOT_CHARGING) {
 		chip->ac_psy->set_property(chip->ac_psy,
 				POWER_SUPPLY_PROP_CHARGING_ENABLED,
