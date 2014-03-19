@@ -315,9 +315,8 @@ static struct input_ma_limit_entry icl_ma_table[] = {
 	{900, 0x03},
 	{1200, 0x04},
 	{1500, 0x05},
-	{1800, 0x06},
-	{2000, 0x07},
-	{3000, 0x08},
+	{2000, 0x06},
+	{3000, 0x07},
 };
 
 #define INPUT_CURRENT_LIMIT_MIN_MA  100
@@ -368,12 +367,8 @@ static int bq24192_set_input_i_limit(struct bq24192_chip *chip, int ma)
 				i = 5;
 				custom_ma = FAST_CHARGE_1500;
 				break;
-			case FAST_CHARGE_1800:
-				i = 6;
-				custom_ma = FAST_CHARGE_1800;
-				break;
 			case FAST_CHARGE_2000:
-				i = 7;
+				i = 6;
 				custom_ma = FAST_CHARGE_2000;
 				break;
 			default:
@@ -1076,7 +1071,7 @@ static bool bq24192_is_wlc_bounced(struct bq24192_chip *chip)
 }
 
 #define WLC_INPUT_I_LIMIT_MA 900
-#define USB_MAX_IBAT_MA 1500
+#define USB_MAX_IBAT_MA 2000
 static void bq24192_external_power_changed(struct power_supply *psy)
 {
 	struct bq24192_chip *chip = container_of(psy,
