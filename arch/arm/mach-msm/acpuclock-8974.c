@@ -28,7 +28,7 @@
 #define LVL_NOM		RPM_REGULATOR_CORNER_NORMAL
 #define LVL_HIGH	RPM_REGULATOR_CORNER_SUPER_TURBO
 
-static int opt_bin = 0;
+static int opt_bin = 1;
 
 static struct hfpll_data hfpll_data __initdata = {
 	.mode_offset = 0x00,
