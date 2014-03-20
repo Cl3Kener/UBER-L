@@ -640,11 +640,11 @@ static ssize_t store_freq_responsiveness(struct kobject *a, struct attribute *b,
 	if (ret != 1)
 		return -EINVAL;
 
-	if (input > 2572800)
-		input = 2572800;
+	if (input > 2534400)
+		input = 2534400;
 
-	if (input < 300000)
-		input = 300000;
+	if (input < 96000)
+		input = 96000;
 
 	dbs_tuners_ins.freq_responsiveness = input;
 
