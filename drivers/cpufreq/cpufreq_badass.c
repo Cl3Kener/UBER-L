@@ -171,12 +171,12 @@ static struct bds_tuners {
 	.ignore_nice = 0,
 	.powersave_bias = 0,
 #ifdef CONFIG_CPU_FREQ_GOV_BADASS_2_PHASE
-	.two_phase_freq = 0,
+	.two_phase_freq = 1267200,
 	.semi_busy_threshold = SEMI_BUSY_THRESHOLD,
 	.semi_busy_clr_threshold = SEMI_BUSY_CLR_THRESHOLD,
 #endif
 #ifdef CONFIG_CPU_FREQ_GOV_BADASS_3_PHASE
-	.three_phase_freq = 0,
+	.three_phase_freq = 1497600,
 	.busy_threshold = BUSY_THRESHOLD,
 	.busy_clr_threshold = BUSY_CLR_THRESHOLD,
 #endif
