@@ -217,7 +217,7 @@ static void lm3630_set_main_current_level(struct i2c_client *client, int level)
 {
 	struct lm3630_device *dev = i2c_get_clientdata(client);
 
-	int max_current = dev->max_current;
+	int max_current;
 	int brightness;
 
 	mutex_lock(&backlight_mtx);
@@ -243,9 +243,12 @@ static void lm3630_set_main_current_level(struct i2c_client *client, int level)
 				if (brightness < dev->min_brightness) {
 					brightness = dev->min_brightness;
 				}
+			} else if (level < 89) {
+				max_current = 18;
+				brightness = 5 + ((level - 15) * 250 / 235);
 			} else {
-				brightness = 
-					(level < 89) ? (5 + ((level - 15) * 250 / 235)) : level;
+				max_current = 18;
+				brightness = level;
 			}
 	
 			lm3630_set_max_current_reg(dev, max_current);
