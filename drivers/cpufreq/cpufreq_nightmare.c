@@ -125,71 +125,6 @@ show_one(freq_up_brake, freq_up_brake);
 show_one(freq_step_dec, freq_step_dec);
 show_one(freq_step_dec_at_max_freq, freq_step_dec_at_max_freq);
 
-/*#define show_freqlimit_param(file_name, cpu)		\
-static ssize_t show_##file_name##_##cpu		\
-(struct kobject *kobj, struct attribute *attr, char *buf)		\
-{									\
-	return sprintf(buf, "%d\n", atomic_read(&file_name[cpu]));	\
-}
-
-#define store_freqlimit_param(file_name, cpu)		\
-static ssize_t store_##file_name##_##cpu		\
-(struct kobject *kobj, struct attribute *attr,				\
-	const char *buf, size_t count)					\
-{									\
-	unsigned int input;						\
-	int ret;							\
-	ret = sscanf(buf, "%d", &input);				\
-	if (ret != 1)							\
-		return -EINVAL;						\
-	if (input == atomic_read(&file_name[cpu])) {		\
-		return count;	\
-	}	\
-	atomic_set(&file_name[cpu], input);			\
-	return count;							\
-}*/
-
-/* min freq limit for awaking */
-/*show_freqlimit_param(min_freq_limit, 0);
-show_freqlimit_param(min_freq_limit, 1);
-#if NR_CPUS >= 4
-show_freqlimit_param(min_freq_limit, 2);
-show_freqlimit_param(min_freq_limit, 3);
-#endif*/
-/* max freq limit for awaking */
-/*show_freqlimit_param(max_freq_limit, 0);
-show_freqlimit_param(max_freq_limit, 1);
-#if NR_CPUS >= 4
-show_freqlimit_param(max_freq_limit, 2);
-show_freqlimit_param(max_freq_limit, 3);
-#endif*/
-/* min freq limit for awaking */
-/*store_freqlimit_param(min_freq_limit, 0);
-store_freqlimit_param(min_freq_limit, 1);
-#if NR_CPUS >= 4
-store_freqlimit_param(min_freq_limit, 2);
-store_freqlimit_param(min_freq_limit, 3);
-#endif*/
-/* max freq limit for awaking */
-/*store_freqlimit_param(max_freq_limit, 0);
-store_freqlimit_param(max_freq_limit, 1);
-#if NR_CPUS >= 4
-store_freqlimit_param(max_freq_limit, 2);
-store_freqlimit_param(max_freq_limit, 3);
-#endif
-define_one_global_rw(min_freq_limit_0);
-define_one_global_rw(min_freq_limit_1);
-#if NR_CPUS >= 4
-define_one_global_rw(min_freq_limit_2);
-define_one_global_rw(min_freq_limit_3);
-#endif
-define_one_global_rw(max_freq_limit_0);
-define_one_global_rw(max_freq_limit_1);
-#if NR_CPUS >= 4
-define_one_global_rw(max_freq_limit_2);
-define_one_global_rw(max_freq_limit_3);
-#endif*/
-
 /**
  * update_sampling_rate - update sampling rate effective immediately if needed.
  * @new_rate: new sampling rate
@@ -513,18 +448,6 @@ define_one_global_rw(freq_step_dec_at_max_freq);
 
 static struct attribute *nightmare_attributes[] = {
 	&sampling_rate.attr,
-	/*&min_freq_limit_0.attr,
-	&min_freq_limit_1.attr,
-#if NR_CPUS >= 4
-	&min_freq_limit_2.attr,
-	&min_freq_limit_3.attr,
-#endif
-	&max_freq_limit_0.attr,
-	&max_freq_limit_1.attr,
-#if NR_CPUS >= 4
-	&max_freq_limit_2.attr,
-	&max_freq_limit_3.attr,
-#endif*/
 	&inc_cpu_load_at_min_freq.attr,
 	&inc_cpu_load.attr,
 	&dec_cpu_load.attr,
@@ -597,11 +520,6 @@ static void nightmare_check_cpu(struct cpufreq_nightmare_cpuinfo *this_nightmare
 	/*printk(KERN_ERR "TIMER CPU[%u], wall[%u], idle[%u]\n",cpu, wall_time, idle_time);*/
 	if (wall_time >= idle_time) { /*if wall_time < idle_time, evaluate cpu load next time*/
 		cur_load = wall_time > idle_time ? (100 * (wall_time - idle_time)) / wall_time : 1;/*if wall_time is equal to idle_time cpu_load is equal to 1*/
-		/* Checking Frequency Limit */
-		/*if (max_freq > cpu_policy->max)
-			max_freq = cpu_policy->max;
-		if (min_freq < cpu_policy->min)
-			min_freq = cpu_policy->min;*/
 		min_freq = cpu_policy->min;
 		max_freq = cpu_policy->max;		
 		/* CPUs Online Scale Frequency*/
@@ -625,7 +543,6 @@ static void nightmare_check_cpu(struct cpufreq_nightmare_cpuinfo *this_nightmare
 		cpufreq_frequency_table_target(cpu_policy, this_nightmare_cpuinfo->freq_table, tmp_freq,
 			CPUFREQ_RELATION_L, &index);
 	 	next_freq = this_nightmare_cpuinfo->freq_table[index].frequency;
-		/*printk(KERN_ERR "FREQ CALC.: CPU[%u], load[%d], target freq[%u], cur freq[%u], min freq[%u], max_freq[%u]\n",cpu, cur_load, next_freq, cpu_policy->cur, cpu_policy->min, max_freq);*/
 		if (next_freq != cpu_policy->cur && cpu_online(cpu)) {
 			__cpufreq_driver_target(cpu_policy, next_freq, CPUFREQ_RELATION_L);
 		}
@@ -696,12 +613,6 @@ static int cpufreq_governor_nightmare(struct cpufreq_policy *policy,
 				return rc;
 			}
 		}
-
-		/*if (atomic_read(&min_freq_limit[cpu]) == 0)
-			atomic_set(&min_freq_limit[cpu], policy->min);
-
-		if (atomic_read(&max_freq_limit[cpu]) == 0)
-			atomic_set(&max_freq_limit[cpu], policy->max);*/
 
 		mutex_unlock(&nightmare_mutex);
 

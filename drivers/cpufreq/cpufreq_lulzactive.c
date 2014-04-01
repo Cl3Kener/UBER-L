@@ -314,11 +314,6 @@ static void cpufreq_lulzactive_timer(unsigned long data)
 		goto exit;
 	}
 
-	/* let it be when s5pv310 contorl the suspending by tegrak */
-	//if (suspending) {
-	//	goto rearm;
-	//}
-
 #if DEBUG
 	if ((int) jiffies - (int) pcpu->cpu_timer.expires >= 10)
 		dbgpr("timer %d: late by %d ticks\n",
