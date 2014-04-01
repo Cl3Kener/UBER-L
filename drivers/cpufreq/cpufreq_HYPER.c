@@ -24,7 +24,6 @@
 #include <linux/tick.h>
 #include <linux/ktime.h>
 #include <linux/sched.h>
-/*#include <linux/pm_qos.h>*/
 #include <linux/input.h>
 #include <linux/slab.h>
 
@@ -141,8 +140,6 @@ static struct dbs_tuners {
 	unsigned int boosted;
 	unsigned int freq_boost_time;
 	unsigned int boostfreq;
-	/*struct notifier_block dvfs_lat_qos_db;
-	unsigned int dvfs_lat_qos_wants;*/
 	unsigned int freq_step;
 	unsigned int freq_responsiveness;
 
@@ -214,10 +211,6 @@ static unsigned int effective_sampling_rate(void)
 {
 	unsigned int effective;
 
-	/*if (dbs_tuners_ins.dvfs_lat_qos_wants)
-		effective = min(dbs_tuners_ins.dvfs_lat_qos_wants,
-				dbs_tuners_ins.sampling_rate);
-	else*/
 		effective = dbs_tuners_ins.sampling_rate;
 
 	return max(effective, min_sampling_rate);
@@ -1097,11 +1090,6 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		break;
 
 	case CPUFREQ_GOV_LIMITS:
-#ifdef CONFIG_MACH_LGE
-		/* If device is being removed, skip set limits */
-		if (!this_dbs_info->cur_policy)
-			break;
-#endif
 		mutex_lock(&this_dbs_info->timer_mutex);
 		if (policy->max < this_dbs_info->cur_policy->cur)
 			__cpufreq_driver_target(this_dbs_info->cur_policy,
@@ -1116,34 +1104,6 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 	}
 	return 0;
 }
-
-/**
- * qos_dvfs_lat_notify - PM QoS Notifier for DVFS_LATENCY QoS Request
- * @nb		notifier block struct
- * @value	QoS value
- * @dummy
- */
-/*static int qos_dvfs_lat_notify(struct notifier_block *nb, unsigned long value,
-			       void *dummy)
-{*/
-	/*
-	 * In the worst case, with a continuous up-treshold + e cpu load
-	 * from up-threshold - e load, the ondemand governor will react
-	 * sampling_rate * 2.
-	 *
-	 * Thus, based on the worst case scenario, we use value / 2;
-	 */
-/*	dbs_tuners_ins.dvfs_lat_qos_wants = value / 2;*/
-
-	/* Update sampling rate */
-/*	update_sampling_rate(0);
-
-	return NOTIFY_OK;
-}
-
-static struct notifier_block hyper_qos_dvfs_lat_nb = {
-	.notifier_call = qos_dvfs_lat_notify,
-};*/
 
 static int __init cpufreq_gov_dbs_init(void)
 {
@@ -1171,15 +1131,8 @@ static int __init cpufreq_gov_dbs_init(void)
 			MIN_SAMPLING_RATE_RATIO * jiffies_to_usecs(10);
 	}
 
-	/*err = pm_qos_add_notifier(PM_QOS_DVFS_RESPONSE_LATENCY,
-			    &hyper_qos_dvfs_lat_nb);
-	if (err)
-		goto error_reg;*/
-
 	err = cpufreq_register_governor(&cpufreq_gov_HYPER);
 	if (err) {
-		/*pm_qos_remove_notifier(PM_QOS_DVFS_RESPONSE_LATENCY,
-				       &hyper_qos_dvfs_lat_nb);*/
 		goto error_reg;
 	}
 
@@ -1191,9 +1144,6 @@ error_reg:
 
 static void __exit cpufreq_gov_dbs_exit(void)
 {
-	/*pm_qos_remove_notifier(PM_QOS_DVFS_RESPONSE_LATENCY,
-			       &hyper_qos_dvfs_lat_nb);*/
-
 	cpufreq_unregister_governor(&cpufreq_gov_HYPER);
 	kfree(&dbs_tuners_ins);
 }
