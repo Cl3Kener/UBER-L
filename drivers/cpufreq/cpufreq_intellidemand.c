@@ -29,10 +29,6 @@
 #include <linux/workqueue.h>
 #include <linux/slab.h>
 
-#if 0
-#include <linux/powersuspend.h>
-#endif
-
 #define INTELLIDEMAND_MAJOR_VERSION    5
 #define INTELLIDEMAND_MINOR_VERSION    0
 
@@ -77,14 +73,9 @@
 #define SUP_HIGH_SLOW_UP_DUR (5)
 #define SUP_FREQ_LEVEL (14)
 
-#if 0
-static unsigned long stored_sampling_rate;
-#endif
-
 #if defined(SMART_UP_PLUS)
 static unsigned int SUP_THRESHOLD_STEPS[SUP_MAX_STEP] = {75, 85, 90};
 static unsigned int SUP_FREQ_STEPS[SUP_MAX_STEP] = {4, 3, 2};
-//static unsigned int min_range = 108000;
 typedef struct{
         unsigned int freq_idx;
         unsigned int freq_value;
@@ -2320,30 +2311,6 @@ bail_acq_sema_failed:
         return 0;
 }
 
-#if 0
-static void cpufreq_intellidemand_power_suspend(struct power_suspend *h)
-{
-        mutex_lock(&dbs_mutex);
-        stored_sampling_rate = dbs_tuners_ins.sampling_rate;
-        dbs_tuners_ins.sampling_rate = DEF_SAMPLING_RATE * 6;
-        update_sampling_rate(dbs_tuners_ins.sampling_rate);
-        mutex_unlock(&dbs_mutex);
-}
-
-static void cpufreq_intellidemand_power_resume(struct power_suspend *h)
-{
-        mutex_lock(&dbs_mutex);
-        dbs_tuners_ins.sampling_rate = stored_sampling_rate;
-        update_sampling_rate(dbs_tuners_ins.sampling_rate);
-        mutex_unlock(&dbs_mutex);
-}
-
-static struct power_suspend cpufreq_intellidemand_power_suspend_info = {
-        .suspend = cpufreq_intellidemand_power_suspend,
-        .resume = cpufreq_intellidemand_power_resume,
-};
-#endif
-
 static int __init cpufreq_gov_dbs_init(void)
 {
         u64 idle_time;
@@ -2404,9 +2371,6 @@ static int __init cpufreq_gov_dbs_init(void)
                                                          "dbs_sync/%d", i);
         }
 
-#if 0
-        register_power_suspend(&cpufreq_intellidemand_power_suspend_info);
-#endif
         return cpufreq_register_governor(&cpufreq_gov_intellidemand);
 }
 
