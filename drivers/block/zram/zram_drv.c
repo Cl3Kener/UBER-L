@@ -559,7 +559,7 @@ static int zram_bvec_rw(struct zram *zram, struct bio_vec *bvec, u32 index,
 static void zram_bio_discard(struct zram *zram, u32 index,
 			     int offset, struct bio *bio)
 {
-	size_t n = bio->bi_iter.bi_size;
+	size_t n = bio->bi_size;
 
 	/*
 	 * zram manages data in physical block size units. Because logical block
