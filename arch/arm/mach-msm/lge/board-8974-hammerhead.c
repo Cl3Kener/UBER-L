@@ -56,6 +56,11 @@
 int set_second_phase_freq(int cpufreq);
 #endif
 
+#ifdef CONFIG_CPU_FREQ_GOV_BADASS
+int set_two_phase_freq_badass(int cpufreq);
+int set_three_phase_freq_badass(int cpufreq);
+#endif
+
 #if defined(CONFIG_LCD_KCAL)
 #include <linux/module.h>
 #include "../../../../drivers/video/msm/mdss/mdss_fb.h"
@@ -275,6 +280,10 @@ void __init msm8974_init(void)
 	msm8974_add_drivers();
 #ifdef CONFIG_CPU_FREQ_GOV_UBERDEMAND
 	set_second_phase_freq(1728000);
+#endif
+#ifdef CONFIG_CPU_FREQ_GOV_BADASS
+	set_two_phase_freq_badass(1267200);
+	set_three_phase_freq_badass(1574400);
 #endif
 }
 
