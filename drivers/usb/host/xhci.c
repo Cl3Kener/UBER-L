@@ -384,12 +384,12 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 
 #else
 
-static int xhci_try_enable_msi(struct usb_hcd *hcd)
+static inline int xhci_try_enable_msi(struct usb_hcd *hcd)
 {
 	return 0;
 }
 
-static void xhci_cleanup_msix(struct xhci_hcd *xhci)
+static inline void xhci_cleanup_msix(struct xhci_hcd *xhci)
 {
 }
 
@@ -800,7 +800,7 @@ static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 	}
 }
 #else
-static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
+static inline void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 {
 }
 #endif /* CONFIG_PCI */
@@ -3999,7 +3999,7 @@ int xhci_set_usb2_hardware_lpm(struct usb_hcd *hcd,
 	unsigned int	port_num;
 	unsigned long	flags;
 	int		hird;
-	bool		delay;
+	bool		delay = false;
 
 	if (hcd->speed == HCD_USB3 || !xhci->hw_lpm_support ||
 			!udev->lpm_capable)
