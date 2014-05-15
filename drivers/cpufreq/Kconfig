@@ -287,6 +287,12 @@ config CPU_FREQ_DEFAULT_GOV_DARKNESS
 	bool "darkness"
 	select CPU_FREQ_GOV_DARKNESS
 
+config CPU_FREQ_DEFAULT_GOV_SMARTMAX
+    bool "smartmax"
+    select CPU_FREQ_GOV_SMARTMAX
+    help
+      Use the CPUFreq governor 'smartmax' as default. 
+
 endchoice
 
 config CPU_FREQ_GOV_ADAPTIVE
@@ -644,6 +650,39 @@ config CPU_FREQ_GOV_LAZY
 
 config CPU_FREQ_GOV_DARKNESS
 	tristate "'darkness' cpufreq policy governor"
+
+
+config CPU_FREQ_GOV_SMARTMAX
+        tristate "'smartmax' cpufreq policy governor"
+        select CPU_FREQ_TABLE
+        help
+          'smartmax' combined ondemand and smartass2
+
+config CPU_FREQ_GOV_SMARTMAX_TEGRA
+        bool "'smartmax' for tegra"
+        depends on CPU_FREQ_GOV_SMARTMAX || CPU_FREQ_GOV_SMARTMAX_EPS
+
+config CPU_FREQ_GOV_SMARTMAX_30
+        bool "'smartmax' for 3.0 and 3.1 kernels"
+        depends on CPU_FREQ_GOV_SMARTMAX || CPU_FREQ_GOV_SMARTMAX_EPS
+
+config CPU_FREQ_GOV_SMARTMAX_ENRC2B
+        bool "'smartmax' defaults for enrc2b"
+        depends on CPU_FREQ_GOV_SMARTMAX || CPU_FREQ_GOV_SMARTMAX_EPS
+
+config CPU_FREQ_GOV_SMARTMAX_PRIMOU
+        bool "'smartmax' defaults for primou"
+        depends on CPU_FREQ_GOV_SMARTMAX || CPU_FREQ_GOV_SMARTMAX_EPS
+
+config CPU_FREQ_GOV_SMARTMAX_M7
+        bool "'smartmax' defaults for m7"
+        depends on CPU_FREQ_GOV_SMARTMAX || CPU_FREQ_GOV_SMARTMAX_EPS
+
+config CPU_FREQ_GOV_SMARTMAX_EPS
+        tristate "'smartmax EPS' cpufreq policy governor"
+        select CPU_FREQ_TABLE
+        help
+          'smartmax EPS' is the extreme powersaving version of smartmax
 
 menu "x86 CPU frequency scaling drivers"
 depends on X86
