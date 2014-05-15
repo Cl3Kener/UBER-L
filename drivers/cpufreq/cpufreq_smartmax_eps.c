@@ -1486,7 +1486,7 @@ static void __exit cpufreq_smartmax_exit(void) {
 	unsigned int i;
 	struct smartmax_info_s *this_smartmax;
 
-	cpufreq_unregister_governor(&cpufreq_gov_smartmax);
+	cpufreq_unregister_governor(&cpufreq_gov_smartmax_eps);
 
 	for_each_possible_cpu(i)
 	{
