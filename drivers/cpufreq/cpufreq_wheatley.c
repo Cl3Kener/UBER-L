@@ -131,8 +131,7 @@ static struct dbs_tuners {
     .allowed_misses = DEF_ALLOWED_MISSES,
 };
 
-static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu,
-						  u64 *wall)
+static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
 {
 	u64 idle_time;
 	u64 cur_wall_time;
@@ -156,24 +155,24 @@ static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu,
 
 static inline cputime64_t get_cpu_idle_time(unsigned int cpu, cputime64_t *wall)
 {
-    u64 idle_time = get_cpu_idle_time_us(cpu, NULL);
+	u64 idle_time = get_cpu_idle_time_us(cpu, NULL);
 
-    if (idle_time == -1ULL)
-	return get_cpu_idle_time_jiffy(cpu, wall);
-    else
-	idle_time += get_cpu_iowait_time_us(cpu, wall);
+	if (idle_time == -1ULL)
+		return get_cpu_idle_time_jiffy(cpu, wall);
+	else
+		idle_time += get_cpu_iowait_time_us(cpu, wall);
 
-    return idle_time;
+	return idle_time;
 }
 
 static inline cputime64_t get_cpu_iowait_time(unsigned int cpu, cputime64_t *wall)
 {
-    u64 iowait_time = get_cpu_iowait_time_us(cpu, wall);
+	u64 iowait_time = get_cpu_iowait_time_us(cpu, wall);
 
-    if (iowait_time == -1ULL)
-	return 0;
+	if (iowait_time == -1ULL)
+		return 0;
 
-    return iowait_time;
+	return iowait_time;
 }
 
 /*
@@ -185,50 +184,50 @@ static unsigned int powersave_bias_target(struct cpufreq_policy *policy,
 					  unsigned int freq_next,
 					  unsigned int relation)
 {
-    unsigned int freq_req, freq_reduc, freq_avg;
-    unsigned int freq_hi, freq_lo;
-    unsigned int index = 0;
-    unsigned int jiffies_total, jiffies_hi, jiffies_lo;
-    struct cpu_dbs_info_s *dbs_info = &per_cpu(od_cpu_dbs_info,
-					       policy->cpu);
+	unsigned int freq_req, freq_avg;
+	unsigned int freq_hi, freq_lo;
+	unsigned int index = 0;
+	unsigned int jiffies_total, jiffies_hi, jiffies_lo;
+	struct cpu_dbs_info_s *dbs_info = &per_cpu(od_cpu_dbs_info,
+						   policy->cpu);
 
-    if (!dbs_info->freq_table) {
-	dbs_info->freq_lo = 0;
-	dbs_info->freq_lo_jiffies = 0;
-	return freq_next;
-    }
+	if (!dbs_info->freq_table) {
+		dbs_info->freq_lo = 0;
+		dbs_info->freq_lo_jiffies = 0;
+		return freq_next;
+	}
 
-    cpufreq_frequency_table_target(policy, dbs_info->freq_table, freq_next,
-				   relation, &index);
-    freq_req = dbs_info->freq_table[index].frequency;
-    freq_reduc = freq_req * dbs_tuners_ins.powersave_bias / 1000;
-    freq_avg = freq_req - freq_reduc;
+	cpufreq_frequency_table_target(policy, dbs_info->freq_table, freq_next,
+			relation, &index);
+	freq_req = dbs_info->freq_table[index].frequency;
+	freq_reduc = freq_req * dbs_tuners_ins.powersave_bias / 1000;
+	freq_avg = freq_req - freq_reduc;
 
-    /* Find freq bounds for freq_avg in freq_table */
-    index = 0;
-    cpufreq_frequency_table_target(policy, dbs_info->freq_table, freq_avg,
-				   CPUFREQ_RELATION_H, &index);
-    freq_lo = dbs_info->freq_table[index].frequency;
-    index = 0;
-    cpufreq_frequency_table_target(policy, dbs_info->freq_table, freq_avg,
-				   CPUFREQ_RELATION_L, &index);
-    freq_hi = dbs_info->freq_table[index].frequency;
+	/* Find freq bounds for freq_avg in freq_table */
+	index = 0;
+	cpufreq_frequency_table_target(policy, dbs_info->freq_table, freq_avg,
+			CPUFREQ_RELATION_H, &index);
+	freq_lo = dbs_info->freq_table[index].frequency;
+	index = 0;
+	cpufreq_frequency_table_target(policy, dbs_info->freq_table, freq_avg,
+			CPUFREQ_RELATION_L, &index);
+	freq_hi = dbs_info->freq_table[index].frequency;
 
-    /* Find out how long we have to be in hi and lo freqs */
-    if (freq_hi == freq_lo) {
-	dbs_info->freq_lo = 0;
-	dbs_info->freq_lo_jiffies = 0;
-	return freq_lo;
-    }
-    jiffies_total = usecs_to_jiffies(dbs_tuners_ins.sampling_rate);
-    jiffies_hi = (freq_avg - freq_lo) * jiffies_total;
-    jiffies_hi += ((freq_hi - freq_lo) / 2);
-    jiffies_hi /= (freq_hi - freq_lo);
-    jiffies_lo = jiffies_total - jiffies_hi;
-    dbs_info->freq_lo = freq_lo;
-    dbs_info->freq_lo_jiffies = jiffies_lo;
-    dbs_info->freq_hi_jiffies = jiffies_hi;
-    return freq_hi;
+	/* Find out how long we have to be in hi and lo freqs */
+	if (freq_hi == freq_lo) {
+		dbs_info->freq_lo = 0;
+		dbs_info->freq_lo_jiffies = 0;
+		return freq_lo;
+	}
+	jiffies_total = usecs_to_jiffies(dbs_tuners_ins.sampling_rate);
+	jiffies_hi = (freq_avg - freq_lo) * jiffies_total;
+	jiffies_hi += ((freq_hi - freq_lo) / 2);
+	jiffies_hi /= (freq_hi - freq_lo);
+	jiffies_lo = jiffies_total - jiffies_hi;
+	dbs_info->freq_lo = freq_lo;
+	dbs_info->freq_lo_jiffies = jiffies_lo;
+	dbs_info->freq_hi_jiffies = jiffies_hi;
+	return freq_hi;
 }
 
 static void wheatley_powersave_bias_init_cpu(int cpu)
@@ -503,7 +502,7 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 	j_dbs_info->prev_cpu_iowait = cur_iowait_time;
 
 	if (dbs_tuners_ins.ignore_nice) {
-	    cputime64_t cur_nice;
+	    u64 cur_nice;
 	    unsigned long cur_nice_jiffies;
 
 	    cur_nice = kcpustat_cpu(j).cpustat[CPUTIME_NICE] -
@@ -669,15 +668,6 @@ static inline void dbs_timer_exit(struct cpu_dbs_info_s *dbs_info)
  */
 static int should_io_be_busy(void)
 {
-#if defined(CONFIG_X86)
-    /*
-     * For Intel, Core 2 (model 15) andl later have an efficient idle.
-     */
-    if (boot_cpu_data.x86_vendor == X86_VENDOR_INTEL &&
-	boot_cpu_data.x86 == 6 &&
-	boot_cpu_data.x86_model >= 15)
-	return 1;
-#endif
     return 0;
 }
 
