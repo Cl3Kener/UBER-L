@@ -19,7 +19,7 @@
 
 #define lzo1x_worst_compress(x) ((x) + ((x) / 16) + 64 + 3)
 
-/* This requires 'workmem' of size LZO1X_1_MEM_COMPRESS */
+/* This requires 'wrkmem' of size LZO1X_1_MEM_COMPRESS */
 int lzo1x_1_compress(const unsigned char *src, size_t src_len,
 		     unsigned char *dst, size_t *dst_len, void *wrkmem);
 
