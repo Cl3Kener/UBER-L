@@ -74,7 +74,7 @@
 static bool backlight_dimmer = true;
 module_param(backlight_dimmer, bool, 0664);
 
-static int min_brightness = 5;
+static int min_brightness = 1;
 module_param(min_brightness, int, 0664);
 
 enum {
