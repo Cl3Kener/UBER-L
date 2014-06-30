@@ -221,6 +221,13 @@ config CPU_FREQ_DEFAULT_GOV_ONDEMANDPLUS
 	 governor. If unsure have a look at the help section of the
 	 driver. Fallback governor will be the performance governor.
 
+config CPU_FREQ_DEFAULT_GOV_OPTIMAX
+	bool "optimax"
+	select CPU_FREQ_GOV_OPTIMAX
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	  Use the CPUFreq governor 'optimax' as default
+
 config CPU_FREQ_DEFAULT_GOV_PEGASUSQ
 	bool "pegasusq"
 	select CPU_FREQ_GOV_PEGASUSQ
@@ -579,6 +586,10 @@ config CPU_FREQ_GOV_ONDEMANDPLUS
 	 For details, take a look at linux/Documentation/cpu-freq.
 
 	 If in doubt, say N.
+
+config CPU_FREQ_GOV_OPTIMAX
+	tristate "'optimax' cpufreq policy governor"
+	select CPU_FREQ_TABLE
 
 config CPU_FREQ_GOV_PEGASUSQ
 	tristate "'pegasusq' cpufreq policy governor"
