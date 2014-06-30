@@ -282,8 +282,8 @@ void __init msm8974_init(void)
 	set_second_phase_freq(1728000);
 #endif
 #ifdef CONFIG_CPU_FREQ_GOV_BADASS
-	set_two_phase_freq_badass(1267200);
-	set_three_phase_freq_badass(1574400);
+	set_two_phase_freq_badass(1574400);
+	set_three_phase_freq_badass(1958400);
 #endif
 }
 
