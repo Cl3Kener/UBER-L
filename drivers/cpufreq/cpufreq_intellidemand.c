@@ -30,35 +30,35 @@
 #include <linux/slab.h>
 
 #define INTELLIDEMAND_MAJOR_VERSION    5
-#define INTELLIDEMAND_MINOR_VERSION    0
+#define INTELLIDEMAND_MINOR_VERSION    5
 
 /*
  * dbs is used in this file as a shortform for demandbased switching
  * It helps to keep variable names smaller, simpler
  */
 
-#define DEF_SAMPLING_RATE                        (50000)
-#define DEF_FREQUENCY_DOWN_DIFFERENTIAL                (10)
-#define DEF_FREQUENCY_UP_THRESHOLD                (60)
-#define DEF_SAMPLING_DOWN_FACTOR                (1)
-#define MAX_SAMPLING_DOWN_FACTOR                (100000)
-#define MICRO_FREQUENCY_DOWN_DIFFERENTIAL        (3)
-#define MICRO_FREQUENCY_UP_THRESHOLD                (70)
-#define MICRO_FREQUENCY_MIN_SAMPLE_RATE                (5000)
-#define MIN_FREQUENCY_UP_THRESHOLD                (11)
-#define MAX_FREQUENCY_UP_THRESHOLD                (100)
-#define MIN_FREQUENCY_DOWN_DIFFERENTIAL                (1)
-#define DBS_INPUT_EVENT_MIN_FREQ                (1190400)
-#define DEF_UI_DYNAMIC_SAMPLING_RATE                (30000)
-#define DBS_UI_SAMPLING_MIN_TIMEOUT                (30)
-#define DBS_UI_SAMPLING_MAX_TIMEOUT                (1000)
-#define DBS_UI_SAMPLING_TIMEOUT                        (80)
+#define DEF_SAMPLING_RATE			(50000)
+#define DEF_FREQUENCY_DOWN_DIFFERENTIAL		(10)
+#define DEF_FREQUENCY_UP_THRESHOLD		(80)
+#define DEF_SAMPLING_DOWN_FACTOR		(1)
+#define MAX_SAMPLING_DOWN_FACTOR		(100000)
+#define MICRO_FREQUENCY_DOWN_DIFFERENTIAL	(3)
+#define MICRO_FREQUENCY_UP_THRESHOLD		(95)
+#define MICRO_FREQUENCY_MIN_SAMPLE_RATE		(10000)
+#define MIN_FREQUENCY_UP_THRESHOLD		(11)
+#define MAX_FREQUENCY_UP_THRESHOLD		(100)
+#define MIN_FREQUENCY_DOWN_DIFFERENTIAL		(1)
+#define DBS_INPUT_EVENT_MIN_FREQ		(1267200)
+#define DEF_UI_DYNAMIC_SAMPLING_RATE		(30000)
+#define DBS_UI_SAMPLING_MIN_TIMEOUT		(30)
+#define DBS_UI_SAMPLING_MAX_TIMEOUT		(1000)
+#define DBS_UI_SAMPLING_TIMEOUT			(80)
 
-#define DEF_FREQ_STEP                                (25)
-#define DEF_STEP_UP_EARLY_HISPEED                (1728000)
-#define DEF_STEP_UP_INTERIM_HISPEED                (1958400)
-#define DEF_SAMPLING_EARLY_HISPEED_FACTOR        (2)
-#define DEF_SAMPLING_INTERIM_HISPEED_FACTOR        (3)
+#define DEF_FREQ_STEP				(25)
+#define DEF_STEP_UP_EARLY_HISPEED		(1190400)
+#define DEF_STEP_UP_INTERIM_HISPEED		(1958400)
+#define DEF_SAMPLING_EARLY_HISPEED_FACTOR	(2)
+#define DEF_SAMPLING_INTERIM_HISPEED_FACTOR	(3)
 
 /* PATCH : SMART_UP */
 #define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
@@ -74,7 +74,7 @@
 #define SUP_FREQ_LEVEL (14)
 
 #if defined(SMART_UP_PLUS)
-static unsigned int SUP_THRESHOLD_STEPS[SUP_MAX_STEP] = {75, 85, 90};
+static unsigned int SUP_THRESHOLD_STEPS[SUP_MAX_STEP] = {85, 90, 95};
 static unsigned int SUP_FREQ_STEPS[SUP_MAX_STEP] = {4, 3, 2};
 typedef struct{
         unsigned int freq_idx;
@@ -87,9 +87,9 @@ static freq_table_idx pre_freq_idx[SUP_CORE_NUM] = {};
 
 #if defined(SMART_UP_SLOW_UP_AT_HIGH_FREQ)
 
-#define SUP_SLOW_UP_FREQUENCY                 (1574400)
-#define SUP_HIGH_SLOW_UP_FREQUENCY         (1728000)
-#define SUP_SLOW_UP_LOAD                 (80)
+#define SUP_SLOW_UP_FREQUENCY 		(1190400)
+#define SUP_HIGH_SLOW_UP_FREQUENCY 	(1958400)
+#define SUP_SLOW_UP_LOAD 		(95)
 
 typedef struct {
         unsigned int hist_max_load[SUP_SLOW_UP_DUR];
@@ -176,7 +176,7 @@ struct cpu_dbs_info_s {
         atomic_t src_sync_cpu;
         atomic_t sync_enabled;
 };
-static DEFINE_PER_CPU(struct cpu_dbs_info_s, od_cpu_dbs_info);
+static DEFINE_PER_CPU(struct cpu_dbs_info_s, id_cpu_dbs_info);
 
 static inline void dbs_timer_init(struct cpu_dbs_info_s *dbs_info);
 static inline void dbs_timer_exit(struct cpu_dbs_info_s *dbs_info);
@@ -243,7 +243,7 @@ static struct dbs_tuners {
         .down_differential_multi_core = MICRO_FREQUENCY_DOWN_DIFFERENTIAL,
         .up_threshold_any_cpu_load = DEF_FREQUENCY_UP_THRESHOLD,
         .ignore_nice = 0,
-        .powersave_bias = 1,
+	.powersave_bias = 0,
         .sync_freq = 1728000,
         .optimal_freq = 1574400,
         //20130711 smart_up 
@@ -324,7 +324,7 @@ static unsigned int powersave_bias_target(struct cpufreq_policy *policy,
         unsigned int index = 0;
         unsigned int jiffies_total, jiffies_hi, jiffies_lo;
         int freq_reduc;
-        struct cpu_dbs_info_s *dbs_info = &per_cpu(od_cpu_dbs_info,
+	struct cpu_dbs_info_s *dbs_info = &per_cpu(id_cpu_dbs_info,
                                                    policy->cpu);
 
         if (!dbs_info->freq_table) {
@@ -388,7 +388,7 @@ static int intellidemand_powersave_bias_setspeed(struct cpufreq_policy *policy,
 
 static void intellidemand_powersave_bias_init_cpu(int cpu)
 {
-        struct cpu_dbs_info_s *dbs_info = &per_cpu(od_cpu_dbs_info, cpu);
+	struct cpu_dbs_info_s *dbs_info = &per_cpu(id_cpu_dbs_info, cpu);
         dbs_info->freq_table = cpufreq_frequency_get_table(cpu);
         dbs_info->freq_lo = 0;
 }
@@ -415,7 +415,7 @@ void intellidemand_boost_cpu(int boost)
                 policy = cpufreq_cpu_get(cpu);
                 if (!policy)
                         continue;
-                dbs_info = &per_cpu(od_cpu_dbs_info, policy->cpu);
+		dbs_info = &per_cpu(id_cpu_dbs_info, policy->cpu);
                 cpufreq_cpu_put(policy);
 
                 mutex_lock(&dbs_info->timer_mutex);
@@ -508,7 +508,7 @@ static void update_sampling_rate(unsigned int new_rate)
                 policy = cpufreq_cpu_get(cpu);
                 if (!policy)
                         continue;
-                dbs_info = &per_cpu(od_cpu_dbs_info, policy->cpu);
+		dbs_info = &per_cpu(id_cpu_dbs_info, policy->cpu);
                 cpufreq_cpu_put(policy);
 
                 mutex_lock(&dbs_info->timer_mutex);
@@ -554,7 +554,7 @@ static ssize_t store_ui_timeout(struct kobject *a, struct attribute *b,
         return count;
 }
 
-static int two_phase_freq_array[NR_CPUS] = {[0 ... NR_CPUS-1] = 0} ;
+static int two_phase_freq_array[NR_CPUS] = {[0 ... NR_CPUS-1] = 1728000} ;
 
 static ssize_t show_two_phase_freq
 (struct kobject *kobj, struct attribute *attr, char *buf)
@@ -607,8 +607,8 @@ static ssize_t show_input_event_min_freq
         return strlen(buf);
 }
 
-static ssize_t store_input_event_min_freq(struct kobject *a, struct attribute *b,
-                const char *buf, size_t count)
+static ssize_t store_input_event_min_freq(struct kobject *a,
+		struct attribute *b, const char *buf, size_t count)
 {
 
         int ret = 0;
@@ -774,7 +774,7 @@ static ssize_t store_sampling_down_factor(struct kobject *a,
         /* Reset down sampling multiplier in case it was active */
         for_each_online_cpu(j) {
                 struct cpu_dbs_info_s *dbs_info;
-                dbs_info = &per_cpu(od_cpu_dbs_info, j);
+		dbs_info = &per_cpu(id_cpu_dbs_info, j);
                 dbs_info->rate_mult = 1;
         }
         return count;
@@ -803,7 +803,7 @@ static ssize_t store_ignore_nice_load(struct kobject *a, struct attribute *b,
         /* we need to re-evaluate prev_cpu_idle */
         for_each_online_cpu(j) {
                 struct cpu_dbs_info_s *dbs_info;
-                dbs_info = &per_cpu(od_cpu_dbs_info, j);
+		dbs_info = &per_cpu(id_cpu_dbs_info, j);
                 dbs_info->prev_cpu_idle = get_cpu_idle_time(j,
                                                 &dbs_info->prev_cpu_wall);
                 if (dbs_tuners_ins.ignore_nice)
@@ -859,29 +859,26 @@ static ssize_t store_powersave_bias(struct kobject *a, struct attribute *b,
                                 if (lock_policy_rwsem_write(cpu) < 0)
                                         continue;
 
-                                dbs_info = &per_cpu(od_cpu_dbs_info, cpu);
+				dbs_info = &per_cpu(id_cpu_dbs_info, cpu);
 
-                                for_each_cpu(j, &cpus_timer_done) {
-                                        if (!dbs_info->cur_policy) {
-                                                pr_err("Dbs policy is NULL\n");
-                                                goto skip_this_cpu;
-                                        }
-                                        if (cpumask_test_cpu(j, dbs_info->
-                                                        cur_policy->cpus))
-                                                goto skip_this_cpu;
-                                }
+				for_each_cpu(j, &cpus_timer_done) {
+					if (!dbs_info->cur_policy) {
+						pr_err("Dbs policy is NULL\n");
+						goto skip_this_cpu;
+					}
+					if (cpumask_test_cpu(j, dbs_info->
+							cur_policy->cpus))
+						goto skip_this_cpu;
+				}
 
-                                cpumask_set_cpu(cpu, &cpus_timer_done);
-                                if (dbs_info->cur_policy) {
-					dbs_timer_exit(dbs_info);
-                                        /* restart dbs timer */
-					mutex_lock(&dbs_info->timer_mutex);
-                                        dbs_timer_init(dbs_info);
-                                        /* Enable frequency synchronization
-                                         * of CPUs */
-					mutex_unlock(&dbs_info->timer_mutex);
-                                        atomic_set(&dbs_info->sync_enabled, 1);
-                                }
+				cpumask_set_cpu(cpu, &cpus_timer_done);
+				if (dbs_info->cur_policy) {
+					/* restart dbs timer */
+					dbs_timer_init(dbs_info);
+					/* Enable frequency synchronization
+					 * of CPUs */
+					atomic_set(&dbs_info->sync_enabled, 1);
+				}
 skip_this_cpu:
                                 unlock_policy_rwsem_write(cpu);
                         }
@@ -894,7 +891,7 @@ skip_this_cpu:
                         if (lock_policy_rwsem_write(cpu) < 0)
                                 continue;
 
-                        dbs_info = &per_cpu(od_cpu_dbs_info, cpu);
+			dbs_info = &per_cpu(id_cpu_dbs_info, cpu);
 
                         for_each_cpu(j, &cpus_timer_done) {
                                 if (!dbs_info->cur_policy) {
@@ -1170,7 +1167,7 @@ static ssize_t store_step_up_interim_hispeed(struct kobject *a,
         int ret;
         ret = sscanf(buf, "%u", &input);
 
-        if (ret != 1 || input > 2265600 ||
+	if (ret != 1 || input > DEF_STEP_UP_INTERIM_HISPEED ||
                         input < 0) {
                 return -EINVAL;
         }
@@ -1289,35 +1286,23 @@ static void dbs_freq_increase(struct cpufreq_policy *p, unsigned int freq)
                         CPUFREQ_RELATION_L : CPUFREQ_RELATION_H);
 }
 
-int set_two_phase_freq(int cpufreq)
+static int input_event_boosted(void)
 {
-        int i  = 0;
-        for ( i = 0 ; i < NR_CPUS; i++)
-                two_phase_freq_array[i] = cpufreq;
-        return 0;
-}
+	unsigned long flags;
 
-void set_two_phase_freq_by_cpu ( int cpu_nr, int cpufreq){
-        two_phase_freq_array[cpu_nr-1] = cpufreq;
-}
+	
+	spin_lock_irqsave(&input_boost_lock, flags);
+	if (input_event_boost) {
+		if (time_before(jiffies, ui_sampling_expired)) {
+			spin_unlock_irqrestore(&input_boost_lock, flags);
+			return 1;
+		}
+		input_event_boost = false;
+		dbs_tuners_ins.sampling_rate = dbs_tuners_ins.origin_sampling_rate;
+	}
+	spin_unlock_irqrestore(&input_boost_lock, flags);
 
-int input_event_boosted(void)
-{
-        unsigned long flags;
-
-        
-        spin_lock_irqsave(&input_boost_lock, flags);
-        if (input_event_boost) {
-                if (time_before(jiffies, ui_sampling_expired)) {
-                        spin_unlock_irqrestore(&input_boost_lock, flags);
-                        return 1;
-                }
-                input_event_boost = false;
-                dbs_tuners_ins.sampling_rate = dbs_tuners_ins.origin_sampling_rate;
-        }
-        spin_unlock_irqrestore(&input_boost_lock, flags);
-
-        return 0;
+	return 0;
 }
 
 static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
@@ -1365,7 +1350,7 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
                 unsigned int load_freq;
                 int freq_avg;
 
-                j_dbs_info = &per_cpu(od_cpu_dbs_info, j);
+		j_dbs_info = &per_cpu(id_cpu_dbs_info, j);
 
                 cur_idle_time = get_cpu_idle_time(j, &cur_wall_time);
                 cur_iowait_time = get_cpu_iowait_time(j, &cur_wall_time);
@@ -1412,12 +1397,32 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
                 if (unlikely(!wall_time || wall_time < idle_time))
                         continue;
 
-                cur_load = 100 * (wall_time - idle_time) / wall_time;
-                j_dbs_info->max_load  = max(cur_load, j_dbs_info->prev_load);
-                j_dbs_info->prev_load = cur_load;
-                freq_avg = __cpufreq_driver_getavg(policy, j);
-                if (freq_avg <= 0)
-                        freq_avg = policy->cur;
+		/*
+		 * If the CPU had gone completely idle, and a task just woke up
+		 * on this CPU now, it would be unfair to calculate 'load' the
+		 * usual way for this elapsed time-window, because it will show
+		 * near-zero load, irrespective of how CPU intensive the new
+		 * task is. This is undesirable for latency-sensitive bursty
+		 * workloads.
+		 *
+		 * To avoid this, we reuse the 'load' from the previous
+		 * time-window and give this task a chance to start with a
+		 * reasonably high CPU frequency.
+		 *
+		 * Detecting this situation is easy: the governor's deferrable
+		 * timer would not have fired during CPU-idle periods. Hence
+		 * an unusually large 'wall_time' indicates this scenario.
+		 */
+		if (unlikely(wall_time > (2 * dbs_tuners_ins.sampling_rate))) {
+			cur_load = j_dbs_info->prev_load;
+		} else {
+			cur_load = 100 * (wall_time - idle_time) / wall_time;
+		}
+		j_dbs_info->max_load  = max(cur_load, j_dbs_info->prev_load);
+		j_dbs_info->prev_load = cur_load;
+		freq_avg = __cpufreq_driver_getavg(policy, j);
+		if (freq_avg <= 0)
+			freq_avg = policy->cur;
 
                 load_freq = cur_load * freq_avg;
                 if (load_freq > max_load_freq)
@@ -1432,7 +1437,7 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 
         for_each_online_cpu(j) {
                 struct cpu_dbs_info_s *j_dbs_info;
-                j_dbs_info = &per_cpu(od_cpu_dbs_info, j);
+		j_dbs_info = &per_cpu(id_cpu_dbs_info, j);
 
                 if (j == policy->cpu)
                         continue;
@@ -1458,8 +1463,6 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 
         /* calculate the scaled load across CPU */
         load_at_max_freq = (cur_load * policy->cur)/policy->cpuinfo.max_freq;
-
-        cpufreq_notify_utilization(policy, load_at_max_freq);
 
 /* PATCH : SMART_UP */
         if (dbs_tuners_ins.smart_up && ( core_j + 1 ) > dbs_tuners_ins.smart_each_off ){
@@ -1879,7 +1882,7 @@ static void dbs_refresh_callback(struct work_struct *work)
         if (lock_policy_rwsem_write(cpu) < 0)
                 goto bail_acq_sema_failed;
 
-        this_dbs_info = &per_cpu(od_cpu_dbs_info, cpu);
+	this_dbs_info = &per_cpu(id_cpu_dbs_info, cpu);
         policy = this_dbs_info->cur_policy;
         if (!policy) {
                 /* CPU not using intellidemand governor */
@@ -1911,7 +1914,7 @@ static int dbs_migration_notify(struct notifier_block *nb,
                                 unsigned long target_cpu, void *arg)
 {
         struct cpu_dbs_info_s *target_dbs_info =
-                &per_cpu(od_cpu_dbs_info, target_cpu);
+		&per_cpu(id_cpu_dbs_info, target_cpu);
 
         atomic_set(&target_dbs_info->src_sync_cpu, (int)arg);
         wake_up(&target_dbs_info->sync_wq);
@@ -1936,20 +1939,20 @@ static int dbs_sync_thread(void *data)
         struct cpufreq_policy *policy;
         int delay;
 
-        this_dbs_info = &per_cpu(od_cpu_dbs_info, cpu);
+	this_dbs_info = &per_cpu(id_cpu_dbs_info, cpu);
 
-        while (1) {
-                wait_event(this_dbs_info->sync_wq,
-                           sync_pending(this_dbs_info) ||
-                           kthread_should_stop());
+	while (1) {
+		wait_event(this_dbs_info->sync_wq,
+			   sync_pending(this_dbs_info) ||
+			   kthread_should_stop());
 
-                if (kthread_should_stop())
-                        break;
+		if (kthread_should_stop())
+			break;
 
-                get_online_cpus();
+		get_online_cpus();
 
-                src_cpu = atomic_read(&this_dbs_info->src_sync_cpu);
-                src_dbs_info = &per_cpu(od_cpu_dbs_info, src_cpu);
+		src_cpu = atomic_read(&this_dbs_info->src_sync_cpu);
+		src_dbs_info = &per_cpu(id_cpu_dbs_info, src_cpu);
                 if (src_dbs_info != NULL &&
                     src_dbs_info->cur_policy != NULL) {
                         src_freq = src_dbs_info->cur_policy->cur;
@@ -2033,7 +2036,7 @@ static void dbs_input_event(struct input_handle *handle, unsigned int type,
 
                 input_event_min_freq = input_event_min_freq_array[num_online_cpus() - 1];
                 for_each_online_cpu(i) {
-                        dbs_info = &per_cpu(od_cpu_dbs_info, i);
+			dbs_info = &per_cpu(id_cpu_dbs_info, i);
                         if (dbs_info->cur_policy &&                
                                 dbs_info->cur_policy->cur < input_event_min_freq) {
                                 wake_up_process(per_cpu(up_task, i));
@@ -2045,28 +2048,28 @@ static void dbs_input_event(struct input_handle *handle, unsigned int type,
 static int input_dev_filter(const char *input_dev_name)
 {
         if (strstr(input_dev_name, "touchscreen") ||
-             strstr(input_dev_name, "touch_dev") ||
-             strstr(input_dev_name, "sec-touchscreen") ||
-            strstr(input_dev_name, "keypad")) {
-                return 0; 
-        } else {
-                return 1;
-        }
+	    strstr(input_dev_name, "elan-touchscreen") ||
+	    strstr(input_dev_name, "touch_dev") ||
+	    strstr(input_dev_name, "sec-touchscreen") ||
+	    strstr(input_dev_name, "keypad")) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
-
 
 static int dbs_input_connect(struct input_handler *handler,
                 struct input_dev *dev, const struct input_device_id *id)
 {
         struct input_handle *handle;
         int error;
-        
-        if (input_dev_filter(dev->name))
-                return -ENODEV;
 
-        handle = kzalloc(sizeof(struct input_handle), GFP_KERNEL);
-        if (!handle)
-                return -ENOMEM;
+	if (input_dev_filter(dev->name))
+		return -ENODEV;
+	
+	handle = kzalloc(sizeof(struct input_handle), GFP_KERNEL);
+	if (!handle)
+		return -ENOMEM;
 
         handle->dev = dev;
         handle->handler = handler;
@@ -2104,7 +2107,7 @@ static struct input_handler dbs_input_handler = {
         .event                = dbs_input_event,
         .connect        = dbs_input_connect,
         .disconnect        = dbs_input_disconnect,
-        .name                = "cpufreq_ond",
+	.name		= "cpufreq_id",
         .id_table        = dbs_ids,
 };
 
@@ -2128,7 +2131,7 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
         unsigned int j;
         int rc;
 
-        this_dbs_info = &per_cpu(od_cpu_dbs_info, cpu);
+	this_dbs_info = &per_cpu(id_cpu_dbs_info, cpu);
 
         switch (event) {
         case CPUFREQ_GOV_START:
@@ -2140,29 +2143,34 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
                 dbs_enable++;
                 for_each_cpu(j, policy->cpus) {
                         struct cpu_dbs_info_s *j_dbs_info;
-                        j_dbs_info = &per_cpu(od_cpu_dbs_info, j);
-                        j_dbs_info->cur_policy = policy;
+			cputime64_t tmp;
+			j_dbs_info = &per_cpu(id_cpu_dbs_info, j);
+			j_dbs_info->cur_policy = policy;
 
-                        j_dbs_info->prev_cpu_idle = get_cpu_idle_time(j,
-                                                &j_dbs_info->prev_cpu_wall);
-                        if (dbs_tuners_ins.ignore_nice)
-                                j_dbs_info->prev_cpu_nice =
-                                                kcpustat_cpu(j).cpustat[CPUTIME_NICE];
-                        set_cpus_allowed(j_dbs_info->sync_thread,
-                                         *cpumask_of(j));
-                        if (!dbs_tuners_ins.powersave_bias)
-                                atomic_set(&j_dbs_info->sync_enabled, 1);
-                }
-                this_dbs_info->cpu = cpu;
-                this_dbs_info->rate_mult = 1;
-                this_dbs_info->freq_stay_count = 1;
-                intellidemand_powersave_bias_init_cpu(cpu);
-                /*
-                 * Start the timerschedule work, when this governor
-                 * is used for first time
-                 */
-                if (dbs_enable == 1) {
-                        unsigned int latency;
+			j_dbs_info->prev_cpu_idle = get_cpu_idle_time(j,
+						&j_dbs_info->prev_cpu_wall);
+			tmp = j_dbs_info->prev_cpu_wall -
+				j_dbs_info->prev_cpu_idle;
+			do_div(tmp, j_dbs_info->prev_cpu_wall);
+			j_dbs_info->prev_load = 100 * tmp;
+			if (dbs_tuners_ins.ignore_nice)
+				j_dbs_info->prev_cpu_nice =
+						kcpustat_cpu(j).cpustat[CPUTIME_NICE];
+			set_cpus_allowed(j_dbs_info->sync_thread,
+					 *cpumask_of(j));
+			if (!dbs_tuners_ins.powersave_bias)
+				atomic_set(&j_dbs_info->sync_enabled, 1);
+		}
+		this_dbs_info->cpu = cpu;
+		this_dbs_info->rate_mult = 1;
+		this_dbs_info->freq_stay_count = 1;
+		intellidemand_powersave_bias_init_cpu(cpu);
+		/*
+		 * Start the timerschedule work, when this governor
+		 * is used for first time
+		 */
+		if (dbs_enable == 1) {
+			unsigned int latency;
 
                         rc = sysfs_create_group(cpufreq_global_kobject,
                                                 &dbs_attr_group);
@@ -2215,7 +2223,7 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 
                 for_each_cpu(j, policy->cpus) {
                         struct cpu_dbs_info_s *j_dbs_info;
-                        j_dbs_info = &per_cpu(od_cpu_dbs_info, j);
+			j_dbs_info = &per_cpu(id_cpu_dbs_info, j);
                         atomic_set(&j_dbs_info->sync_enabled, 0);
                 }
 
@@ -2280,7 +2288,7 @@ static int cpufreq_gov_dbs_up_task(void *data)
                 if (lock_policy_rwsem_write(cpu) < 0)
                         goto bail_acq_sema_failed;
 
-                this_dbs_info = &per_cpu(od_cpu_dbs_info, cpu);
+		this_dbs_info = &per_cpu(id_cpu_dbs_info, cpu);
                 policy = this_dbs_info->cur_policy;
                 if (!policy) {
                         
@@ -2345,7 +2353,7 @@ static int __init cpufreq_gov_dbs_init(void)
         }
         for_each_possible_cpu(i) {
                 struct cpu_dbs_info_s *this_dbs_info =
-                        &per_cpu(od_cpu_dbs_info, i);
+			&per_cpu(id_cpu_dbs_info, i);
                 struct dbs_work_struct *dbs_work =
                         &per_cpu(dbs_refresh_work, i);
 
@@ -2381,7 +2389,7 @@ static void __exit cpufreq_gov_dbs_exit(void)
         cpufreq_unregister_governor(&cpufreq_gov_intellidemand);
         for_each_possible_cpu(i) {
                 struct cpu_dbs_info_s *this_dbs_info =
-                        &per_cpu(od_cpu_dbs_info, i);
+			&per_cpu(id_cpu_dbs_info, i);
                 mutex_destroy(&this_dbs_info->timer_mutex);
                 kthread_stop(this_dbs_info->sync_thread);
                 if (per_cpu(up_task, i)) {
