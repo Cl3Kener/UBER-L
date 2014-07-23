@@ -3032,6 +3032,7 @@ int mdss_mdp_ad_config(struct msm_fb_data_type *mfd,
 			struct mdss_ad_init_cfg *init_cfg)
 {
 	struct mdss_ad_info *ad;
+	struct mdss_mdp_ctl *ctl;
 	struct msm_fb_data_type *bl_mfd;
 	int lin_ret = -1, inv_ret = -1, att_ret = -1, ret = 0;
 	u32 ratio_temp, shift = 0;
