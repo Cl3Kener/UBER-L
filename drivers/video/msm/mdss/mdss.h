@@ -74,7 +74,6 @@ struct mdss_data_type {
 	u32 has_bwc;
 	u32 has_decimation;
 	u8 has_wfd_blk;
-	u8 has_wb_ad;
 
 	u32 mdp_irq_mask;
 	u32 mdp_hist_irq_mask;
@@ -113,10 +112,8 @@ struct mdss_data_type {
 	void *video_intf;
 	u32 nintf;
 
-	struct mdss_mdp_ad *ad_off;
 	struct mdss_ad_info *ad_cfgs;
 	u32 nad_cfgs;
-	u32 nmax_concurrent_ad_hw;
 	struct workqueue_struct *ad_calc_wq;
 
 	struct ion_client *iclient;

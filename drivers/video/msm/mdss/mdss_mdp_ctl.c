@@ -17,8 +17,6 @@
 #include <linux/mutex.h>
 #include <linux/platform_device.h>
 #include <linux/sort.h>
-#include <linux/dma-mapping.h>
-#include <linux/delay.h>
 
 #include "mdss_fb.h"
 #include "mdss_mdp.h"
@@ -506,7 +504,6 @@ static int mdss_mdp_ctl_free(struct mdss_mdp_ctl *ctl)
 	ctl->read_line_cnt_fnc = NULL;
 	ctl->add_vsync_handler = NULL;
 	ctl->remove_vsync_handler = NULL;
-	ctl->panel_data = NULL;
 	mutex_unlock(&mdss_mdp_ctl_lock);
 
 	return 0;
@@ -515,7 +512,7 @@ static int mdss_mdp_ctl_free(struct mdss_mdp_ctl *ctl)
 static struct mdss_mdp_mixer *mdss_mdp_mixer_alloc(
 		struct mdss_mdp_ctl *ctl, u32 type, int mux)
 {
-	struct mdss_mdp_mixer *mixer = NULL, *alt_mixer = NULL;
+	struct mdss_mdp_mixer *mixer = NULL;
 	u32 nmixers_intf;
 	u32 nmixers_wb;
 	u32 i;
@@ -533,16 +530,6 @@ static struct mdss_mdp_mixer *mdss_mdp_mixer_alloc(
 	case MDSS_MDP_MIXER_TYPE_INTF:
 		mixer_pool = ctl->mdata->mixer_intf;
 		nmixers = nmixers_intf;
-
-		/*
-		 * try to reserve first layer mixer for write back if
-		 * assertive display needs to be supported through wfd
-		 */
-		if (ctl->mdata->has_wb_ad && ctl->intf_num) {
-			alt_mixer = mixer_pool;
-			mixer_pool++;
-			nmixers--;
-		}
 		break;
 
 	case MDSS_MDP_MIXER_TYPE_WRITEBACK:
@@ -581,9 +568,6 @@ static struct mdss_mdp_mixer *mdss_mdp_mixer_alloc(
 		}
 		mixer = NULL;
 	}
-
-	if (!mixer && alt_mixer && (alt_mixer->ref_cnt == 0))
-		mixer = alt_mixer;
 	mutex_unlock(&mdss_mdp_ctl_lock);
 
 	return mixer;
@@ -1298,41 +1282,6 @@ int mdss_mdp_ctl_stop(struct mdss_mdp_ctl *ctl)
 	mutex_unlock(&ctl->lock);
 
 	return ret;
-}
-
-/*
- * mdss_mdp_ctl_reset() - reset mdp ctl path.
- * @ctl: mdp controller.
- * this function called when underflow happen,
- * it will reset mdp ctl path and poll for its completion
- *
- * Note: called within atomic context.
- */
-int mdss_mdp_ctl_reset(struct mdss_mdp_ctl *ctl)
-{
-	u32 status = 1;
-	int cnt = 20;
-
-	mdss_mdp_ctl_write(ctl, MDSS_MDP_REG_CTL_SW_RESET, 1);
-
-	/*
-	 * it takes around 30us to have mdp finish resetting its ctl path
-	 * poll every 50us so that reset should be completed at 1st poll
-	 */
-
-	do {
-		udelay(50);
-		status = mdss_mdp_ctl_read(ctl, MDSS_MDP_REG_CTL_SW_RESET);
-		status &= 0x01;
-		pr_debug("status=%x\n", status);
-		cnt--;
-		if (cnt == 0) {
-			pr_err("timeout\n");
-			return -EAGAIN;
-		}
-	} while (status);
-
-	return 0;
 }
 
 static int mdss_mdp_mixer_setup(struct mdss_mdp_ctl *ctl,
