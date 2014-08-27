@@ -1403,7 +1403,7 @@ static struct input_handler dbs_input_handler = {
 };
 
 
-void set_input_event_min_freq_by_cpu ( int cpu_nr, int cpufreq){
+void set_input_event_min_freq_by_cpu_slim ( int cpu_nr, int cpufreq){
 	input_event_min_freq_array[cpu_nr-1] = cpufreq;
 }
 static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
