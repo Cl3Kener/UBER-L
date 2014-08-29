@@ -3192,6 +3192,8 @@ CONFIG_PGTABLE_MAPPING=y
 # CONFIG_ANDROID_INTF_ALARM_DEV is not set
 # CONFIG_PHONE is not set
 # CONFIG_USB_WPAN_HCD is not set
+CONFIG_UIO=y
+CONFIG_UIO_MSM_SHAREDMEM=y
 
 #
 # Qualcomm MSM specific device drivers
