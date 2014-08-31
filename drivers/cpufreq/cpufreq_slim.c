@@ -923,7 +923,7 @@ static void dbs_freq_increase(struct cpufreq_policy *p, unsigned load, unsigned 
 	trace_cpufreq_slim_up (p->cpu, freq, p->cur);
 }
 
-int set_two_phase_freq(int cpufreq)
+int set_two_phase_freq_slim(int cpufreq)
 {
 	int i  = 0;
 	for ( i = 0 ; i < NR_CPUS; i++)
@@ -931,7 +931,7 @@ int set_two_phase_freq(int cpufreq)
 	return 0;
 }
 
-void set_two_phase_freq_by_cpu ( int cpu_nr, int cpufreq){
+void set_two_phase_freq_by_cpu_slim ( int cpu_nr, int cpufreq){
 	two_phase_freq_array[cpu_nr-1] = cpufreq;
 }
 
