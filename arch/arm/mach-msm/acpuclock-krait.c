@@ -23,6 +23,10 @@
 #include <linux/cpu.h>
 #include <linux/regulator/consumer.h>
 #include <linux/iopoll.h>
+#ifdef CONFIG_DEBUG_FS
+#include <linux/seq_file.h>
+#include <linux/debugfs.h>
+#endif
 
 #include <asm/mach-types.h>
 #include <asm/cpu.h>
@@ -49,6 +53,10 @@ static DEFINE_MUTEX(driver_lock);
 static DEFINE_SPINLOCK(l2_lock);
 
 static struct drv_data drv;
+
+#ifdef CONFIG_DEBUG_FS
+static unsigned int krait_chip_variant = 0;
+#endif
 
 static unsigned long acpuclk_krait_get_rate(int cpu)
 {
@@ -1184,6 +1192,9 @@ static struct pvs_table * __init select_freq_plan(
 			 drv.pvs_bin);
 	}
 
+#ifdef CONFIG_DEBUG_FS
+        krait_chip_variant = drv.pvs_bin;
+#endif
 	return &params->pvs_tables[drv.speed_bin][drv.pvs_bin];
 }
 
@@ -1263,6 +1274,44 @@ static void __init hw_init(void)
 
 	bus_init(l2_level);
 }
+
+#ifdef CONFIG_DEBUG_FS
+static int krait_variant_debugfs_show(struct seq_file *s, void *data)
+{
+	seq_printf(s, "Your krait chip variant is: \n");
+	seq_printf(s, "[%s] SNAIL \n", ((krait_chip_variant == 0) ? "X" : " "));
+	seq_printf(s, "[%s] SLOWER \n", ((krait_chip_variant == 1) ? "X" : " "));
+	seq_printf(s, "[%s] SLOW \n", ((krait_chip_variant == 2) ? "X" : " "));
+	seq_printf(s, "[%s] NOMINAL \n", ((krait_chip_variant == 3) ? "X" : " "));
+	seq_printf(s, "[%s] FAST \n", ((krait_chip_variant == 4) ? "X" : " "));
+	seq_printf(s, "[%s] FASTER \n", ((krait_chip_variant == 5) ? "X" : " "));
+	seq_printf(s, "[%s] OVER 3000! \n", ((krait_chip_variant == 6) ? "X" : " "));
+
+	return 0;
+}
+
+static int krait_variant_debugfs_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, krait_variant_debugfs_show, inode->i_private);
+}
+
+static const struct file_operations krait_variant_debugfs_fops = {
+	.open		= krait_variant_debugfs_open,
+	.read		= seq_read,
+	.llseek		= seq_lseek,
+	.release	= single_release,
+};
+
+static int __init krait_variant_debugfs_init(void) {
+        struct dentry *d;
+        d = debugfs_create_file("krait_variant", S_IRUGO, NULL, NULL,
+        &krait_variant_debugfs_fops);
+        if (!d)
+                return -ENOMEM;
+        return 0;
+}
+late_initcall(krait_variant_debugfs_init);
+#endif
 
 int __init acpuclk_krait_init(struct device *dev,
 			      const struct acpuclk_krait_params *params)
