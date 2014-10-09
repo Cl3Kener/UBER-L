@@ -49,6 +49,7 @@ modules.builtin
 # KControl modules directory (make deb-pkg)
 #
 /kcontrol/
+/OUT/
 
 #
 # Debian directory (make deb-pkg)
