@@ -2,9 +2,9 @@
 #error "Please don't include <linux/compiler-gcc5.h> directly, include <linux/compiler.h> instead."
 #endif
 
-#define __used			__attribute__((__used__))
-#define __must_check 		__attribute__((warn_unused_result))
-#define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
+#define __used				__attribute__((__used__))
+#define __must_check			__attribute__((warn_unused_result))
+#define __compiler_offsetof(a, b)	__builtin_offsetof(a, b)
 
 /* Mark functions as cold. gcc will assume any path leading to a call
    to them will be unlikely.  This means a lot of manual unlikely()s
