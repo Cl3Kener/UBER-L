@@ -38,27 +38,16 @@ ENTRY(v7wbi_flush_user_tlb_range)
 	dsb
 	mov	r0, r0, lsr #PAGE_SHIFT		@ align address
 	mov	r1, r1, lsr #PAGE_SHIFT
-<<<<<<< HEAD
 #ifdef CONFIG_ARCH_MSM8X60
 	mov	r0, r0, lsl #PAGE_SHIFT
-=======
-#ifdef CONFIG_ARM_ERRATA_720789
-	mov	r3, #0
->>>>>>> 17c7d14... ARM: 7478/1: errata: extend workaround for erratum #720789
 #else
 	asid	r3, r3				@ mask ASID
-#endif
 	orr	r0, r3, r0, lsl #PAGE_SHIFT	@ Create initial MVA
 #endif
 	mov	r1, r1, lsl #PAGE_SHIFT
 1:
-<<<<<<< HEAD
 #ifdef CONFIG_ARCH_MSM8X60
 	ALT_SMP(mcr	p15, 0, r0, c8, c3, 3)	@ TLB invalidate U MVA (shareable)
-=======
-#ifdef CONFIG_ARM_ERRATA_720789
-	ALT_SMP(mcr	p15, 0, r0, c8, c3, 3)	@ TLB invalidate U MVA all ASID (shareable)
->>>>>>> 17c7d14... ARM: 7478/1: errata: extend workaround for erratum #720789
 #else
 	ALT_SMP(mcr	p15, 0, r0, c8, c3, 1)	@ TLB invalidate U MVA (shareable)
 #endif
@@ -86,13 +75,8 @@ ENTRY(v7wbi_flush_kern_tlb_range)
 	mov	r0, r0, lsl #PAGE_SHIFT
 	mov	r1, r1, lsl #PAGE_SHIFT
 1:
-<<<<<<< HEAD
 #ifdef CONFIG_ARCH_MSM8X60
 	ALT_SMP(mcr	p15, 0, r0, c8, c3, 3)	@ TLB invalidate U MVA (shareable)
-=======
-#ifdef CONFIG_ARM_ERRATA_720789
-	ALT_SMP(mcr	p15, 0, r0, c8, c3, 3)	@ TLB invalidate U MVA all ASID (shareable)
->>>>>>> 17c7d14... ARM: 7478/1: errata: extend workaround for erratum #720789
 #else
 	ALT_SMP(mcr	p15, 0, r0, c8, c3, 1)	@ TLB invalidate U MVA (shareable)
 #endif
