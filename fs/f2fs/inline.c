@@ -400,7 +400,7 @@ int f2fs_add_inline_entry(struct inode *dir, const struct qstr *name,
 	struct f2fs_inline_dentry *dentry_blk = NULL;
 	struct f2fs_dentry_ptr d;
 	int slots = GET_DENTRY_SLOTS(namelen);
-	struct page *page;
+	struct page *page = NULL;
 	int err = 0;
 
 	ipage = get_node_page(sbi, dir->i_ino);

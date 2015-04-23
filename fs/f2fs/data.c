@@ -12,12 +12,12 @@
 #include <linux/f2fs_fs.h>
 #include <linux/buffer_head.h>
 #include <linux/mpage.h>
-#include <linux/aio.h>
 #include <linux/writeback.h>
 #include <linux/backing-dev.h>
 #include <linux/blkdev.h>
 #include <linux/bio.h>
 #include <linux/prefetch.h>
+#include <linux/uio.h>
 
 #include "f2fs.h"
 #include "node.h"
@@ -258,6 +258,7 @@ static void f2fs_map_bh(struct super_block *sb, pgoff_t pgofs,
 	size_t max_size = bh_result->b_size;
 	size_t mapped_size;
 
+	clear_buffer_new(bh_result);
 	map_bh(bh_result, sb, ei->blk + pgofs - ei->fofs);
 	mapped_size = (ei->fofs + ei->len - pgofs) << blkbits;
 	bh_result->b_size = min(max_size, mapped_size);
