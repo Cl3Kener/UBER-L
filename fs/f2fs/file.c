@@ -892,7 +892,7 @@ static int f2fs_collapse_range(struct inode *inode, loff_t offset, loff_t len)
 	if (ret)
 		return ret;
 
-	truncate_pagecache(inode, offset);
+	truncate_pagecache(inode, 0, offset);
 
 	ret = f2fs_do_collapse(inode, pg_start, pg_end);
 	if (ret)
