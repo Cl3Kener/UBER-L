@@ -561,7 +561,7 @@ static void msm_mpdec_suspend(struct work_struct * msm_mpdec_suspend_work) {
 	}
 
 	/* main work thread can sleep now */
-	cancel_delayed_work_sync(&msm_mpdec_work);
+	cancel_delayed_work(&msm_mpdec_work);
 
 	for_each_possible_cpu(cpu) {
 #ifdef CONFIG_MSM_MPDEC_INPUTBOOST_CPUMIN
