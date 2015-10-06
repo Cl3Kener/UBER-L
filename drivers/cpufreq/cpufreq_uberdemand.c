@@ -44,7 +44,7 @@
 #define MIN_FREQUENCY_UP_THRESHOLD		(20)
 #define MAX_FREQUENCY_UP_THRESHOLD		(100)
 #define MIN_FREQUENCY_DOWN_DIFFERENTIAL		(1)
-#define SECOND_PHASE_FREQ			(1728000)
+#define SECOND_PHASE_FREQ			(CONFIG_CPU_FREQ_GOV_UBERDEMAND_SECOND_PHASE_FREQ)
 
 /*
  * The polling frequency of this governor depends on the capability of

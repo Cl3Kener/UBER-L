@@ -214,7 +214,7 @@ void __init msm8974_init(void)
 	board_dt_populate(adata);
 	msm8974_add_drivers();
 #ifdef CONFIG_CPU_FREQ_GOV_UBERDEMAND
-	set_second_phase_freq(1728000);
+	set_second_phase_freq(CONFIG_CPU_FREQ_GOV_UBERDEMAND_SECOND_PHASE_FREQ);
 #endif
 #ifdef CONFIG_CPU_FREQ_GOV_BADASS
 	set_two_phase_freq_badass(1267200);
