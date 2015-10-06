@@ -684,6 +684,11 @@ config CPU_FREQ_GOV_UBERDEMAND
 	  do fast frequency switching (i.e, very low latency frequency
 	  transitions).
 
+config CPU_FREQ_GOV_UBERDEMAND_SECOND_PHASE_FREQ
+	int "'uberdemand' Second Phase Frequency"
+	default 1728000
+	depends on CPU_FREQ_GOV_UBERDEMAND
+
 config CPU_FREQ_GOV_USERSPACE
 	tristate "'userspace' governor for userspace frequency scaling"
 	help
